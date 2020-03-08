@@ -39,6 +39,8 @@ public class GwConsumer {
             result = Integer.parseInt(value);
         } catch (IOException ex) {
             LOGGER.error("error loading object info");
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("getOwnerSindikat(): error reading url: {}", url);
         }
         return result;
     }
@@ -74,6 +76,8 @@ public class GwConsumer {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("get1635TargetStrings(): error reading url: {}", url);
         }
 
         return result;

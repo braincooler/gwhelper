@@ -22,7 +22,8 @@ public class MainView extends VerticalLayout {
         Map<String, Integer> targetStrings = gwConsumer.get1635TargetStrings();
         targetStrings.keySet().forEach(s -> {
             String link = "http://www.gwars.ru" + s;
-            if (gwConsumer.getOwnerSindikat(s) != targetStrings.get(s)) {
+            int ownerSindikat = gwConsumer.getOwnerSindikat(s);
+            if (ownerSindikat == 15 || ownerSindikat != targetStrings.get(s)) {
                 Anchor anchor = new Anchor(link);
                 anchor.setText(String.valueOf(targetStrings.get(s)));
                 anchor.setTarget("_blank");
