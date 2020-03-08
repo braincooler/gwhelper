@@ -24,7 +24,7 @@ public class MainView extends VerticalLayout {
             String link = "http://www.gwars.ru" + s;
             if (gwConsumer.getOwnerSindikat(s) != targetStrings.get(s)) {
                 Anchor anchor = new Anchor(link);
-                anchor.setText(gwConsumer.getOwnerSindikat(s) + " - " + targetStrings.get(s));
+                anchor.setText(String.valueOf(targetStrings.get(s)));
                 add(anchor);
             }
 
