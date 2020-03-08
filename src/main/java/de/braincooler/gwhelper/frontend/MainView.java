@@ -25,9 +25,9 @@ public class MainView extends VerticalLayout {
             if (gwConsumer.getOwnerSindikat(s) != targetStrings.get(s)) {
                 Anchor anchor = new Anchor(link);
                 anchor.setText(String.valueOf(targetStrings.get(s)));
+                anchor.setTarget("_blank");
                 add(anchor);
             }
-
         });
     }
 }
