@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GwConsumer {
@@ -24,6 +26,57 @@ public class GwConsumer {
     public GwConsumer(CredService credService) {
         this.credService = credService;
         initWebClient();
+    }
+
+    public int getOwnerSindikat(String targetString) {
+        String url = "http://www.gwars.ru" + targetString;
+        int result = 0;
+        try {
+            HtmlPage site = webClient.getPage(url);
+            HtmlTable table = (HtmlTable) site.getByXPath("//table").get(4);
+            String value = table.getRow(0).asText();
+            value = value.substring(value.indexOf("#") + 1, value.length() - 1);
+            result = Integer.parseInt(value);
+        } catch (IOException ex) {
+            LOGGER.error("error loading object info");
+        }
+        return result;
+    }
+
+    public Map<String, Integer> get1635TargetStrings() {
+        String url = "http://www.gwars.ru/syndicate.php?id=1635&page=targets";
+        final HtmlPage riba;
+        Map<String, Integer> result = new HashMap<>();
+        try {
+            riba = webClient.getPage(url);
+            HtmlTable table = (HtmlTable) riba.getByXPath("//table[@class='bordersupdown']").get(1);
+
+            List<HtmlTableRow> tableRows = table.getRows();
+
+            for (int i = 2; i < tableRows.size(); i++) {
+                HtmlTableRow row = tableRows.get(i);
+                List<HtmlTableCell> cells = row.getCells();
+                String objectRef = cells.get(1).getFirstChild()
+                        .getChildNodes()
+                        .get(2)
+                        .getAttributes()
+                        .getNamedItem("href")
+                        .getNodeValue();
+
+                String sind = cells.get(0).getFirstChild()
+                        .getChildNodes()
+                        .get(1)
+                        .asText();
+                sind = sind.substring(sind.indexOf("#") + 1);
+                Integer sindId = Integer.parseInt(sind);
+                result.put(objectRef, sindId);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public double getRibaMinPrice() {
