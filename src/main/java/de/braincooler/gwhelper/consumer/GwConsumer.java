@@ -28,37 +28,38 @@ public class GwConsumer {
         initWebClient();
     }
 
-    public int getOwnerSindikat(String targetString) {
-        String url = "http://www.gwars.ru" + targetString;
-        int result = 0;
+    public int getBuildingOwnerSyndicateId(String url) {
         try {
             HtmlPage site = webClient.getPage(url);
             HtmlTable table = (HtmlTable) site.getByXPath("//table").get(4);
             String value = table.getRow(0).asText();
             value = value.substring(value.indexOf("#") + 1, value.length() - 1);
-            result = Integer.parseInt(value);
+            return Integer.parseInt(value);
         } catch (IOException ex) {
             LOGGER.error("error loading object info");
         } catch (ArrayIndexOutOfBoundsException ex) {
-            LOGGER.error("getOwnerSindikat(): error reading url: {}", url);
+            LOGGER.error("getOwnerSyndicateId(): error reading url: {}", url);
         }
-        return result;
+        return 0;
     }
 
-    public Map<String, Integer> get1635TargetStrings() {
+    // 1. full link 2. controlled syndicate
+    public Map<String, Integer> getMapTargetBuildingAndSyndId() {
         String url = "http://www.gwars.ru/syndicate.php?id=1635&page=targets";
-        final HtmlPage riba;
+        final HtmlPage page;
         Map<String, Integer> result = new HashMap<>();
         try {
-            riba = webClient.getPage(url);
-            HtmlTable table = (HtmlTable) riba.getByXPath("//table[@class='bordersupdown']").get(1);
+            page = webClient.getPage(url);
+            HtmlTable table = (HtmlTable) page.getByXPath("//table[@class='bordersupdown']")
+                    .get(1);
 
             List<HtmlTableRow> tableRows = table.getRows();
 
             for (int i = 2; i < tableRows.size(); i++) {
                 HtmlTableRow row = tableRows.get(i);
                 List<HtmlTableCell> cells = row.getCells();
-                String objectRef = cells.get(1).getFirstChild()
+                String objectRef = cells.get(1)
+                        .getFirstChild()
                         .getChildNodes()
                         .get(2)
                         .getAttributes()
@@ -71,7 +72,7 @@ public class GwConsumer {
                         .asText();
                 sind = sind.substring(sind.indexOf("#") + 1);
                 Integer sindId = Integer.parseInt(sind);
-                result.put(objectRef, sindId);
+                result.put("http://www.gwars.ru" + objectRef, sindId);
             }
 
         } catch (IOException e) {
@@ -132,7 +133,7 @@ public class GwConsumer {
     }
 
     private void initWebClient() {
-        this.webClient = new WebClient(BrowserVersion.CHROME);
+        this.webClient = new WebClient(BrowserVersion.BEST_SUPPORTED);
         webClient.setCssErrorHandler(new CSSErrorHandler() {
             @Override
             public void warning(CSSParseException e) throws CSSException {
