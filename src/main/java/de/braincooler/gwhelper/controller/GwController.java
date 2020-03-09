@@ -45,6 +45,6 @@ public class GwController {
                 "\n" + resultBody +
                 "</body>\n" +
                 "</html>";
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(template);
     }
 }
