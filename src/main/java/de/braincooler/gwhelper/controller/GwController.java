@@ -20,4 +20,9 @@ public class GwController {
     public ResponseEntity<?> getTargets() {
         return ResponseEntity.ok(gwService.getTargetLinks());
     }
+
+    @GetMapping(path = "/sektor")
+    public ResponseEntity<?> getSektorObject() {
+        return ResponseEntity.ok(gwService.getSektorObject());
+    }
 }

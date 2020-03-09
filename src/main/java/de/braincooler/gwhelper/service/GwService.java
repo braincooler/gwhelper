@@ -1,7 +1,6 @@
 package de.braincooler.gwhelper.service;
 
 import de.braincooler.gwhelper.consumer.GwConsumer;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,7 +22,7 @@ public class GwService {
         targetsWithoutTurrel = new HashMap<>();
     }
 
-    @Scheduled(fixedDelay = 620000)
+    //@Scheduled(fixedDelay = 620000)
     public void updateTargets() {
         targets = gwConsumer.getMapTargetBuildingAndSyndId();
         targetsWithoutTurrel.clear();
@@ -57,5 +56,10 @@ public class GwService {
                 "</h3>" +
                 "</body>\n" +
                 "</html>";
+    }
+
+    public String[] getSektorObject() {
+        gwConsumer.getSektorObject();
+        return new String[0];
     }
 }

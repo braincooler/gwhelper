@@ -28,6 +28,29 @@ public class GwConsumer {
         initWebClient();
     }
 
+
+    public void getSektorObject() {
+        try {
+            HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=tech");
+            HtmlTable table = (HtmlTable) site.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
+
+            List<HtmlTableRow> tableRows = table.getRows();
+            for (int i = 2; i < tableRows.size(); i++) {
+                HtmlTableRow row = tableRows.get(i);
+                List<HtmlTableCell> cells = row.getCells();
+
+                String classAttr = cells.get(0).getAttribute("class");
+                if (!classAttr.equals("greenbg") && !cells.get(0).getAttribute("class").equals("greengreenbg")) {
+                    System.out.println(row.asText());
+                    System.out.println("----------------------------------");
+                }
+            }
+
+        } catch (IOException ex) {
+            LOGGER.error("getSektorObject(): error loading page");
+        }
+    }
+
     public int getBuildingOwnerSyndicateId(String url) {
         try {
             HtmlPage site = webClient.getPage(url);
@@ -166,4 +189,5 @@ public class GwConsumer {
             LOGGER.error("error initializing web client", ex);
         }
     }
+
 }
