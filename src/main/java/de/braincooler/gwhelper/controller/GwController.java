@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @RequestMapping("/")
@@ -23,14 +24,27 @@ public class GwController {
     public ResponseEntity<?> getTargets() {
         Map<String, String> result = new HashMap<>();
         Map<String, Integer> targetStrings = gwConsumer.get1635TargetStrings();
+        String link = "<a href=\"%s\">%s</a>\n";
+        AtomicReference<String> resultBody = new AtomicReference<>("");
         targetStrings.keySet().forEach(s -> {
-            String link = "http://www.gwars.ru" + s;
             int ownerSindikat = gwConsumer.getOwnerSindikat(s);
             if (ownerSindikat == 15 || ownerSindikat != targetStrings.get(s)) {
-                result.put(String.valueOf(targetStrings.get(s)), link);
+                result.put(String.valueOf(targetStrings.get(s)), "http://www.gwars.ru" + s);
+                resultBody.set(resultBody + String.format(link, "http://www.gwars.ru" + s, s));
             }
         });
 
+
+        String template = "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Title</title>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "\n" + resultBody +
+                "</body>\n" +
+                "</html>";
         return ResponseEntity.ok(result);
     }
 }
