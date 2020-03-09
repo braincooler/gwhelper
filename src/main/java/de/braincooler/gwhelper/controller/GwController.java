@@ -22,7 +22,7 @@ public class GwController {
     @GetMapping
     public ResponseEntity<?> getTargets() {
         Map<String, Integer> targetStrings = gwConsumer.get1635TargetStrings();
-        String link = "<a href=\"%s\">%s</a>\n";
+        String link = "<a href=\"%s\" target=\"_blank\">%s</a>";
         AtomicReference<String> resultBody = new AtomicReference<>("");
         targetStrings.keySet().forEach(s -> {
             int ownerSindikat = gwConsumer.getOwnerSindikat(s);
