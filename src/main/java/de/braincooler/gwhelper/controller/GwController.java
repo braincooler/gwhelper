@@ -27,7 +27,7 @@ public class GwController {
             String link = "http://www.gwars.ru" + s;
             int ownerSindikat = gwConsumer.getOwnerSindikat(s);
             if (ownerSindikat == 15 || ownerSindikat != targetStrings.get(s)) {
-                result.put(String.valueOf(targetStrings.get(s)), s);
+                result.put(String.valueOf(targetStrings.get(s)), link);
             }
         });
 
