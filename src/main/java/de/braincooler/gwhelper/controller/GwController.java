@@ -2,6 +2,7 @@ package de.braincooler.gwhelper.controller;
 
 import de.braincooler.gwhelper.consumer.GwConsumer;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,7 @@ public class GwController {
         this.gwConsumer = gwConsumer;
     }
 
+    @GetMapping
     public ResponseEntity<?> getTargets() {
         Map<String, String> result = new HashMap<>();
         Map<String, Integer> targetStrings = gwConsumer.get1635TargetStrings();
