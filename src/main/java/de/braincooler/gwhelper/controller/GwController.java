@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,15 +21,15 @@ public class GwController {
 
     @GetMapping
     public ResponseEntity<?> getTargets() {
-        Map<String, String> result = new HashMap<>();
         Map<String, Integer> targetStrings = gwConsumer.get1635TargetStrings();
         String link = "<a href=\"%s\">%s</a>\n";
         AtomicReference<String> resultBody = new AtomicReference<>("");
         targetStrings.keySet().forEach(s -> {
             int ownerSindikat = gwConsumer.getOwnerSindikat(s);
             if (ownerSindikat == 15 || ownerSindikat != targetStrings.get(s)) {
-                result.put(String.valueOf(targetStrings.get(s)), "http://www.gwars.ru" + s);
-                resultBody.set(resultBody + String.format(link, "http://www.gwars.ru" + s, s));
+                resultBody.set(resultBody +
+                        String.format(link, "http://www.gwars.ru" + s, targetStrings.get(s)) +
+                        "</br>");
             }
         });
 
