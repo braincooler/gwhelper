@@ -48,7 +48,19 @@ public class GwConsumer {
                             .getAttributes()
                             .getNamedItem("href")
                             .getNodeValue();
-                    sektorObjectsToOwnerSyndId.put(objectRef, 666);
+
+                    String ownerSyndRef = cells.get(1)
+                            .getChildNodes()
+                            .get(0)
+                            .getChildNodes()
+                            .get(0)
+                            .getChildNodes()
+                            .get(0)
+                            .getAttributes()
+                            .getNamedItem("href")
+                            .getNodeValue();
+                    int ownerSyndId = Integer.parseInt(ownerSyndRef.substring(objectRef.indexOf("=" + 1)));
+                    sektorObjectsToOwnerSyndId.put(objectRef, ownerSyndId);
                 }
             }
 
