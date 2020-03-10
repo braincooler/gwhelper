@@ -43,12 +43,13 @@ public class GwConsumer {
                 for (int j = 47; j <= 53; j++) {
                     String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=", i, j);
                     fillObjectsMapFromSektorPage(webClient.getPage(url + "plants"));
+                    Thread.sleep(500);
                     fillObjectsMapFromSektorPage(webClient.getPage(url + "tech"));
                 }
             }
 
 
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             LOGGER.error("getSektorObject(): error loading page");
         }
     }
