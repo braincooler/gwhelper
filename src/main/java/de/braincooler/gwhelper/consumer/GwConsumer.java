@@ -36,11 +36,17 @@ public class GwConsumer {
         return new HashMap<>(sektorObjectsToOwnerSyndId);
     }
 
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 600000)
     public void initSektorObjects() {
         try {
-            HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=plants");
-            fillObjectsMapFromSektorPage(site);
+            for (int i = 47; i <= 53; i++) {
+                for (int j = 47; j <= 53; j++) {
+                    String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=", i, j);
+                    fillObjectsMapFromSektorPage(webClient.getPage(url + "plants"));
+                    fillObjectsMapFromSektorPage(webClient.getPage(url + "tech"));
+                }
+            }
+
 
         } catch (IOException ex) {
             LOGGER.error("getSektorObject(): error loading page");
