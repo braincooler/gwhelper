@@ -9,6 +9,7 @@ import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.config.CredService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,54 +24,63 @@ public class GwConsumer {
     private WebClient webClient;
     private CredService credService;
 
+    private Map<String, String> sektorObjectsToOwnerSyndId = new HashMap<>();
+
+
     public GwConsumer(CredService credService) {
         this.credService = credService;
         initWebClient();
     }
 
-
     public Map<String, String> getSektorObjects() {
-        Map<String, String> sektorObjectsToOwnerSyndId = new HashMap<>();
+        return new HashMap<>(sektorObjectsToOwnerSyndId);
+    }
+
+    @Scheduled(fixedDelay = 300000)
+    public void initSektorObjects() {
         try {
             HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=plants");
-            HtmlTable table = (HtmlTable) site.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
-
-            List<HtmlTableRow> tableRows = table.getRows();
-            for (int i = 2; i < tableRows.size(); i++) {
-                HtmlTableRow row = tableRows.get(i);
-                List<HtmlTableCell> cells = row.getCells();
-                HtmlTableCell firstCell = cells.get(0);
-                String classAttr = firstCell.getAttribute("class");
-                if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
-                    String objectRef = firstCell
-                            .getChildNodes()
-                            .get(1)
-                            .getAttributes()
-                            .getNamedItem("href")
-                            .getNodeValue();
-
-                    String ownerSyndRef = cells.get(1)
-                            .getChildNodes()
-                            .get(0)
-                            .getChildNodes()
-                            .get(0)
-                            .getChildNodes()
-                            .get(0)
-                            .getAttributes()
-                            .getNamedItem("href")
-                            .getNodeValue();
-                    String ownerSyndId = "0";
-                    if (ownerSyndRef.contains("syndicate.php?id")) {
-                        ownerSyndId = ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1);
-                    }
-                    sektorObjectsToOwnerSyndId.put(objectRef, ownerSyndId);
-                }
-            }
+            fillObjectsMapFromSektorPage(site);
 
         } catch (IOException ex) {
             LOGGER.error("getSektorObject(): error loading page");
         }
-        return sektorObjectsToOwnerSyndId;
+    }
+
+    private void fillObjectsMapFromSektorPage(HtmlPage htmlPage) {
+        HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
+
+        List<HtmlTableRow> tableRows = table.getRows();
+        for (int i = 2; i < tableRows.size(); i++) {
+            HtmlTableRow row = tableRows.get(i);
+            List<HtmlTableCell> cells = row.getCells();
+            HtmlTableCell firstCell = cells.get(0);
+            String classAttr = firstCell.getAttribute("class");
+            if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
+                String objectRef = firstCell
+                        .getChildNodes()
+                        .get(1)
+                        .getAttributes()
+                        .getNamedItem("href")
+                        .getNodeValue();
+
+                String ownerSyndRef = cells.get(1)
+                        .getChildNodes()
+                        .get(0)
+                        .getChildNodes()
+                        .get(0)
+                        .getChildNodes()
+                        .get(0)
+                        .getAttributes()
+                        .getNamedItem("href")
+                        .getNodeValue();
+                String ownerSyndId = "0";
+                if (ownerSyndRef.contains("syndicate.php?id")) {
+                    ownerSyndId = ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1);
+                }
+                sektorObjectsToOwnerSyndId.put(objectRef, ownerSyndId);
+            }
+        }
     }
 
     public int getBuildingOwnerSyndicateId(String url) {
