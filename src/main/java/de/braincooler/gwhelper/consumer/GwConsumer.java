@@ -59,7 +59,10 @@ public class GwConsumer {
                             .getAttributes()
                             .getNamedItem("href")
                             .getNodeValue();
-                    String ownerSyndId = ownerSyndRef.substring(objectRef.indexOf("=") + 1);
+                    String ownerSyndId = "0";
+                    if (ownerSyndRef.contains("syndicate.php?id")) {
+                        ownerSyndId = ownerSyndRef.substring(objectRef.indexOf("=") + 1);
+                    }
                     sektorObjectsToOwnerSyndId.put(objectRef, ownerSyndId);
                 }
             }
