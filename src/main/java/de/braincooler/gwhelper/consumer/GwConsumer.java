@@ -29,7 +29,8 @@ public class GwConsumer {
     }
 
 
-    public void getSektorObject() {
+    public Map<String, Integer> getSektorObjects() {
+        Map<String, Integer> sektorObjectsToOwnerSyndId = new HashMap<>();
         try {
             HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=tech");
             HtmlTable table = (HtmlTable) site.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
@@ -38,17 +39,23 @@ public class GwConsumer {
             for (int i = 2; i < tableRows.size(); i++) {
                 HtmlTableRow row = tableRows.get(i);
                 List<HtmlTableCell> cells = row.getCells();
-
-                String classAttr = cells.get(0).getAttribute("class");
-                if (!classAttr.equals("greenbg") && !cells.get(0).getAttribute("class").equals("greengreenbg")) {
-                    System.out.println(row.asText());
-                    System.out.println("----------------------------------");
+                HtmlTableCell firstCell = cells.get(0);
+                String classAttr = firstCell.getAttribute("class");
+                if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
+                    String objectRef = firstCell
+                            .getChildNodes()
+                            .get(1)
+                            .getAttributes()
+                            .getNamedItem("href")
+                            .getNodeValue();
+                    sektorObjectsToOwnerSyndId.put(objectRef, 666);
                 }
             }
 
         } catch (IOException ex) {
             LOGGER.error("getSektorObject(): error loading page");
         }
+        return sektorObjectsToOwnerSyndId;
     }
 
     public int getBuildingOwnerSyndicateId(String url) {
