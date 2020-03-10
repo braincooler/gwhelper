@@ -29,8 +29,8 @@ public class GwConsumer {
     }
 
 
-    public Map<String, Integer> getSektorObjects() {
-        Map<String, Integer> sektorObjectsToOwnerSyndId = new HashMap<>();
+    public Map<String, String> getSektorObjects() {
+        Map<String, String> sektorObjectsToOwnerSyndId = new HashMap<>();
         try {
             HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=tech");
             HtmlTable table = (HtmlTable) site.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
@@ -59,8 +59,8 @@ public class GwConsumer {
                             .getAttributes()
                             .getNamedItem("href")
                             .getNodeValue();
-                    int ownerSyndId = Integer.parseInt(ownerSyndRef.substring(objectRef.indexOf("=" + 1)));
-                    sektorObjectsToOwnerSyndId.put(objectRef, ownerSyndId);
+                    //int ownerSyndId = Integer.parseInt(ownerSyndRef.substring(objectRef.indexOf("=" + 1)));
+                    sektorObjectsToOwnerSyndId.put(objectRef, ownerSyndRef);
                 }
             }
 

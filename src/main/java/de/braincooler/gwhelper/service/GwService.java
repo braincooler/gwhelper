@@ -58,7 +58,7 @@ public class GwService {
                 "</html>";
     }
 
-    public Map<String, Integer> getSektorObject() {
+    public Map<String, String> getSektorObject() {
         return gwConsumer.getSektorObjects();
     }
 }
