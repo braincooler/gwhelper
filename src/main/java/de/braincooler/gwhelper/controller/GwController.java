@@ -30,3 +30,4 @@ public class GwController {
     public ResponseEntity<?> getLogs() {
         return ResponseEntity.ok(gwService.getLogs());
     }
+}
