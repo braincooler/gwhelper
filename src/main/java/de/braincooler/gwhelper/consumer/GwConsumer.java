@@ -25,7 +25,7 @@ public class GwConsumer {
     private CredService credService;
 
     private Map<String, String> sektorObjectsToOwnerSyndId = new HashMap<>();
-
+    private Map<String, String> logs = new HashMap<>();
 
     public GwConsumer(CredService credService) {
         this.credService = credService;
@@ -42,8 +42,10 @@ public class GwConsumer {
             for (int i = 47; i <= 53; i++) {
                 for (int j = 47; j <= 53; j++) {
                     String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=", i, j);
+                    logs.put("URL: " + url + "plants", "");
                     fillObjectsMapFromSektorPage(webClient.getPage(url + "plants"));
                     Thread.sleep(500);
+                    logs.put("URL: " + url + "tech", "");
                     fillObjectsMapFromSektorPage(webClient.getPage(url + "tech"));
                 }
             }
@@ -229,4 +231,7 @@ public class GwConsumer {
         }
     }
 
+    public Map<String, String> getLogs() {
+        return logs;
+    }
 }

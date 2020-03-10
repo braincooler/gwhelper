@@ -25,4 +25,8 @@ public class GwController {
     public ResponseEntity<?> getSektorObject() {
         return ResponseEntity.ok(gwService.getSektorObject());
     }
-}
+
+    @GetMapping(path = "/logs")
+    public ResponseEntity<?> getLogs() {
+        return ResponseEntity.ok(gwService.getLogs());
+    }

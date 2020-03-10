@@ -61,4 +61,8 @@ public class GwService {
     public Map<String, String> getSektorObject() {
         return gwConsumer.getSektorObjects();
     }
+
+    public Map<String, String> getLogs() {
+        return gwConsumer.getLogs();
+    }
 }
