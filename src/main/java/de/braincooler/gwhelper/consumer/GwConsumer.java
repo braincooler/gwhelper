@@ -32,7 +32,7 @@ public class GwConsumer {
     public Map<String, String> getSektorObjects() {
         Map<String, String> sektorObjectsToOwnerSyndId = new HashMap<>();
         try {
-            HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=tech");
+            HtmlPage site = webClient.getPage("http://www.gwars.ru/map.php?sx=51&sy=50&st=plants");
             HtmlTable table = (HtmlTable) site.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
             List<HtmlTableRow> tableRows = table.getRows();
