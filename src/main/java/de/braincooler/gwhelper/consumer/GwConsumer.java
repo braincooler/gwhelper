@@ -287,7 +287,7 @@ public class GwConsumer {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logs.put("getAtacktime(): ", e.getMessage());
         }
 
         return "empty";
