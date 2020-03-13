@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class GwService {
     private static final String HTML_LINK = "<a href=\"%s\" target=\"_blank\">%s</a>";
     private static final Set<Integer> SYND_INC = new HashSet<>(Arrays.asList(15));
+    private static List<Integer> enemySyndTop = Arrays.asList(6363, 592, 5353, 1677);
 
     private final GwConsumer gwConsumer;
     // link - syndId
@@ -67,6 +68,13 @@ public class GwService {
 
     public BuildingResponse getBuildingsReadyForAttack() {
         return new BuildingResponse(buildingsReadyForAttack.size(), buildingsReadyForAttack);
+    }
+
+    public BuildingResponse getBuildingsReadyForAttackNoTop() {
+        List<Building> buildingsNoTop = buildingsReadyForAttack.stream()
+                .filter(building -> !enemySyndTop.contains(building.getControlSynd()))
+                .collect(Collectors.toList());
+        return new BuildingResponse(buildingsNoTop.size(), buildingsNoTop);
     }
 
     @Scheduled(fixedDelay = 600000) // 10 min

@@ -22,9 +22,14 @@ public class GwController {
         return ResponseEntity.ok(gwService.getTargetLinks());
     }
 
-    @GetMapping(path = "/sektor")
-    public ResponseEntity<?> getSektorObject() {
+    @GetMapping(path = "/atack")
+    public ResponseEntity<?> getBuildingsReadyForAttack() {
         return ResponseEntity.ok(gwService.getBuildingsReadyForAttack());
+    }
+
+    @GetMapping(path = "/atack/notop")
+    public ResponseEntity<?> getBuildingsReadyForAttackNoTop() {
+        return ResponseEntity.ok(gwService.getBuildingsReadyForAttackNoTop());
     }
 
     @GetMapping(path = "/logs")
