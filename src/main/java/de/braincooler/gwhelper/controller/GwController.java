@@ -17,14 +17,14 @@ public class GwController {
         this.gwService = gwService;
     }
 
-    @GetMapping
+    //@GetMapping
     public ResponseEntity<?> getTargets() {
         return ResponseEntity.ok(gwService.getTargetLinks());
     }
 
     @GetMapping(path = "/sektor")
     public ResponseEntity<?> getSektorObject() {
-        return ResponseEntity.ok(gwService.getSektorObject());
+        return ResponseEntity.ok(gwService.getBuildingsReadyForAttack());
     }
 
     @GetMapping(path = "/logs")
@@ -32,7 +32,7 @@ public class GwController {
         return ResponseEntity.ok(gwService.getLogs());
     }
 
-    @GetMapping(path = "/time/{buildingId}")
+    //@GetMapping(path = "/time/{buildingId}")
     public ResponseEntity<?> getAttackTime(@PathVariable int buildingId) {
         return ResponseEntity.ok(gwService.getAtackTime(buildingId));
     }

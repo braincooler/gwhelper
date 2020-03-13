@@ -7,6 +7,10 @@ public class Building {
     private int area;
     private String sektorUrl;
 
+    public int getId() {
+        return Integer.parseInt(ref.substring(ref.indexOf("=") + 1));
+    }
+
     public String getSektorUrl() {
         return sektorUrl;
     }

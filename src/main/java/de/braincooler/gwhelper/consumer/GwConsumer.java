@@ -12,7 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GwConsumer {
@@ -277,19 +280,25 @@ public class GwConsumer {
         return logs;
     }
 
-    public String getAtackTime(int buildingId) {
+    public LocalDateTime getAtackTime(int buildingId) {
         String url = "http://www.gwars.ru/objectworkers.php?id=" + buildingId;
         try {
             final HtmlPage page = webClient.getPage(url);
-            List<Object> byXPath = page.getByXPath("//*[contains(text(),'Следующее нападение возможно после')]");
-            if (byXPath.size() > 0) {
-                return ((DomNode) byXPath.get(0)).asText();
+            List<HtmlNoBreak> byXPath = page.getByXPath("//nobr");
+            List<HtmlNoBreak> timeNoBrs = byXPath.stream()
+                    .filter(htmlNoBreak -> htmlNoBreak.asText().contains("Следующее нападение возможно после"))
+                    .collect(Collectors.toList());
+            if (timeNoBrs.size() > 0) {
+                String atackTimeString = timeNoBrs.get(0).asText();
+                atackTimeString = atackTimeString.substring(atackTimeString.indexOf("после ") + 6, atackTimeString.length() - 1);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+                return LocalDateTime.parse(atackTimeString, formatter);
             }
 
         } catch (IOException e) {
-            logs.put("getAtacktime(): ", e.getMessage());
+            e.printStackTrace();
         }
 
-        return "empty";
+        return LocalDateTime.MIN;
     }
 }

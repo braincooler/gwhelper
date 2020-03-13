@@ -3,8 +3,11 @@ package de.braincooler.gwhelper.service;
 import de.braincooler.gwhelper.consumer.Building;
 import de.braincooler.gwhelper.consumer.BuildingResponse;
 import de.braincooler.gwhelper.consumer.GwConsumer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -18,6 +21,7 @@ public class GwService {
     // link - syndId
     private Map<String, Integer> targets;
     private Map<String, Integer> targetsWithoutTurrel;
+    private List<Building> buildingsReadyForAttack = new ArrayList<>();
 
     public GwService(GwConsumer gwConsumer) {
         this.gwConsumer = gwConsumer;
@@ -61,18 +65,33 @@ public class GwService {
                 "</html>";
     }
 
-    public BuildingResponse getSektorObject() {
+    public BuildingResponse getBuildingsReadyForAttack() {
+        return new BuildingResponse(buildingsReadyForAttack.size(), buildingsReadyForAttack);
+    }
+
+    @Scheduled(fixedDelay = 600000) // 10 min
+    private void initBuildingsReadyForAttack() {
         List<Building> sektorBuilings = gwConsumer.getSektorBuilings().stream()
                 .filter(building -> building.getControlSynd() != building.getOwnerSynd())
                 .collect(Collectors.toList());
-        return new BuildingResponse(sektorBuilings.size(), sektorBuilings);
+        buildingsReadyForAttack = sektorBuilings.stream()
+                .filter(building -> {
+                    LocalDateTime nextAtackTime = getAtackTime(building.getId());
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return nextAtackTime.isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                })
+                .collect(Collectors.toList());
     }
 
     public Map<String, String> getLogs() {
         return gwConsumer.getLogs();
     }
 
-    public String getAtackTime(int buildingId) {
+    public LocalDateTime getAtackTime(int buildingId) {
         return gwConsumer.getAtackTime(buildingId);
     }
 }
