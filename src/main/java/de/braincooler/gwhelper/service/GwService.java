@@ -1,11 +1,13 @@
 package de.braincooler.gwhelper.service;
 
+import de.braincooler.gwhelper.consumer.Building;
+import de.braincooler.gwhelper.consumer.BuildingResponse;
 import de.braincooler.gwhelper.consumer.GwConsumer;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 public class GwService {
@@ -23,7 +25,7 @@ public class GwService {
         targetsWithoutTurrel = new HashMap<>();
     }
 
-    @Scheduled(fixedDelay = 620000)
+    //@Scheduled(fixedDelay = 620000)
     public void updateTargets() {
         targets = gwConsumer.getMapTargetBuildingAndSyndId();
         targetsWithoutTurrel.clear();
@@ -59,11 +61,18 @@ public class GwService {
                 "</html>";
     }
 
-    public Map<String, String> getSektorObject() {
-        return gwConsumer.getSektorObjects();
+    public BuildingResponse getSektorObject() {
+        List<Building> sektorBuilings = gwConsumer.getSektorBuilings().stream()
+                .filter(building -> building.getControlSynd() != building.getOwnerSynd())
+                .collect(Collectors.toList());
+        return new BuildingResponse(sektorBuilings.size(), sektorBuilings);
     }
 
     public Map<String, String> getLogs() {
         return gwConsumer.getLogs();
+    }
+
+    public String getAtackTime(int buildingId) {
+        return gwConsumer.getAtackTime(buildingId);
     }
 }

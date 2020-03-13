@@ -3,11 +3,12 @@ package de.braincooler.gwhelper.controller;
 import de.braincooler.gwhelper.service.GwService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping
 public class GwController {
 
     private final GwService gwService;
@@ -29,5 +30,10 @@ public class GwController {
     @GetMapping(path = "/logs")
     public ResponseEntity<?> getLogs() {
         return ResponseEntity.ok(gwService.getLogs());
+    }
+
+    @GetMapping(path = "/time/{buildingId}")
+    public ResponseEntity<?> getAttackTime(@PathVariable int buildingId) {
+        return ResponseEntity.ok(gwService.getAtackTime(buildingId));
     }
 }
