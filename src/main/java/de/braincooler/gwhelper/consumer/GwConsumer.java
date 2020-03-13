@@ -112,9 +112,6 @@ public class GwConsumer {
                         .getNamedItem("href")
                         .getNodeValue();
 
-                //LOGGER.info("-> objectRef={} ownerSyndRef={} controlSyndRef={} areaRef={}", objectRef, ownerSyndRef,
-                //controlSyndRef, areaRef);
-
                 int ownerSyndId = 0;
                 if (ownerSyndRef.contains("syndicate.php?id")) {
                     ownerSyndId = Integer.parseInt(ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
@@ -132,6 +129,8 @@ public class GwConsumer {
                     building.setSektorUrl(url);
                     building.setArea(area);
                     buildings.add(building);
+                    logs.put("add to list: ",
+                            String.format("objRef=%s ownerSynd=%s controlSyndRef=%s", objectRef, ownerSyndRef, controlSyndRef));
                 }
             }
         }
@@ -146,8 +145,10 @@ public class GwConsumer {
             return Integer.parseInt(value);
         } catch (IOException ex) {
             LOGGER.error("error loading object info");
+            logs.put("getBuildingOwnerSyndicateId()", "error loading object info - " + url);
         } catch (ArrayIndexOutOfBoundsException ex) {
             LOGGER.error("getOwnerSyndicateId(): error reading url: {}", url);
+            logs.put("getOwnerSyndicateId(): error reading url: {}", url);
         }
         return 0;
     }
