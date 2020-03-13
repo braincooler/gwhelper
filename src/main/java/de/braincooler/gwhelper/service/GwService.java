@@ -80,7 +80,7 @@ public class GwService {
     @Scheduled(fixedDelay = 1200000, initialDelay = 5000) // 20 min
     private void initBuildingsReadyForAttack() {
         List<Building> sektorBuilings = gwConsumer.getSektorBuilings().stream()
-                .filter(building -> building.getControlSynd() != getStaticControlSyndId(building.getId()))
+                .filter(building -> building.getControlSynd() != building.getStaticControlsyndId())
                 .collect(Collectors.toList());
         buildingsReadyForAttack = sektorBuilings.stream()
                 .filter(building -> {

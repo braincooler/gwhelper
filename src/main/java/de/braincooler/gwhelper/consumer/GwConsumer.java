@@ -121,6 +121,7 @@ public class GwConsumer {
                         building.setControlSynd(controlSyndId);
                         building.setSektorUrl(url);
                         building.setArea(area);
+                        building.setStaticControlsyndId(getStaticControlSyndId(building.getId()));
                         buildings.add(building);
                     }
                 }
