@@ -11,12 +11,14 @@ public class Building {
 
     public String getAsHtmlTr() {
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
-        String link = String.format(linkTemplate, ref, description);
+        String buildingLink = String.format(linkTemplate, ref, description);
+        String controlSyndOnlineLink = String.format("http://www.gwars.ru/syndicate.php?id=%d&page=online", controlSynd);
+        String constrolSindLink = String.format(linkTemplate, controlSyndOnlineLink, controlSynd);
         return String.format("<tr>\n" +
                 "    <td>%s</td>\n" +
+                "    <td>%s</td>\n" +
                 "    <td>%d</td>\n" +
-                "    <td>%d</td>\n" +
-                "  </tr>", link, controlSynd, area
+                "  </tr>", buildingLink, constrolSindLink, area
         );
     }
 
