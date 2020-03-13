@@ -3,6 +3,7 @@ package de.braincooler.gwhelper.service;
 import de.braincooler.gwhelper.consumer.Building;
 import de.braincooler.gwhelper.consumer.BuildingResponse;
 import de.braincooler.gwhelper.consumer.GwConsumer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -76,7 +77,7 @@ public class GwService {
         return new BuildingResponse(buildingsNoTop.size(), buildingsNoTop);
     }
 
-    //@Scheduled(fixedDelay = 1200000) // 20 min
+    @Scheduled(fixedDelay = 1200000, initialDelay = 5000) // 20 min
     private void initBuildingsReadyForAttack() {
         List<Building> sektorBuilings = gwConsumer.getSektorBuilings().stream()
                 .filter(building -> building.getControlSynd() != getStaticControlSyndId(building.getId()))
@@ -94,8 +95,8 @@ public class GwService {
                 .collect(Collectors.toList());
     }
 
-    public Map<String, String> getLogs() {
-        return gwConsumer.getLogs();
+    public Set<String> getLogs() {
+        return gwConsumer.getNotReadablePages();
     }
 
     public LocalDateTime getAtackTime(int buildingId) {

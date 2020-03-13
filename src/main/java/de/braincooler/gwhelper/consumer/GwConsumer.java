@@ -5,17 +5,13 @@ import com.gargoylesoftware.css.parser.CSSException;
 import com.gargoylesoftware.css.parser.CSSParseException;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.config.CredService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -32,7 +28,7 @@ public class GwConsumer {
     private CredService credService;
 
     private List<Building> buildings = new ArrayList<>();
-    private Map<String, String> logs = new HashMap<>();
+    private Set<String> notReadablePages = new HashSet<>();
 
     public GwConsumer(CredService credService) {
         this.credService = credService;
@@ -44,20 +40,16 @@ public class GwConsumer {
         return new ArrayList<>(buildings);
     }
 
-    @Scheduled(fixedDelay = 600000)
     public void initSektorObjects() {
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
-                try {
-                    LOGGER.info("init plants x={}, y={}", i, j);
-                    Thread.sleep(500);
-                    initBuildingsFromSektorPage(i, j, "plants");
-                    LOGGER.info("init tech x={}, y={}", i, j);
-                    Thread.sleep(500);
-                    initBuildingsFromSektorPage(i, j, "tech");
-                } catch (Exception ex) {
-                    LOGGER.error("initSektorObjects()", ex);
-                }
+                LOGGER.info("---------------------------------------------------------------");
+                LOGGER.info("init x={}, y={}", i, j);
+                LOGGER.info("plants..");
+                initBuildingsFromSektorPage(i, j, "plants");
+                LOGGER.info("tech..");
+                initBuildingsFromSektorPage(i, j, "tech");
+                LOGGER.info("---------------------------------------------------------------");
             }
         }
     }
@@ -65,81 +57,79 @@ public class GwConsumer {
     private void initBuildingsFromSektorPage(int sektorX, int sektorY, String type) {
         String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=%s", sektorX, sektorY, type);
 
-        HtmlPage htmlPage = null;
+        HtmlPage htmlPage;
         try {
-            LOGGER.info("url={}", url);
-            WebRequest webRequest = new WebRequest(new URL(url));
-            webRequest.setCharset(StandardCharsets.UTF_8);
-            htmlPage = webClient.getPage(webRequest);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            LOGGER.error("getSektorObject(): error loading page url={}", url);
-        }
-        HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
+            LOGGER.info("init buildings from url={}", url);
+            Thread.sleep(500);
+            htmlPage = webClient.getPage(url);
+            HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
-        List<HtmlTableRow> tableRows = table.getRows();
-        LOGGER.info("table rows={}", tableRows.size());
-        for (int i = 2; i < tableRows.size(); i++) {
-            HtmlTableRow row = tableRows.get(i);
-            List<HtmlTableCell> cells = row.getCells();
-            HtmlTableCell firstCell = cells.get(0);
-            String classAttr = firstCell.getAttribute("class");
-            if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
+            List<HtmlTableRow> tableRows = table.getRows();
+            for (int i = 2; i < tableRows.size(); i++) {
+                HtmlTableRow row = tableRows.get(i);
+                List<HtmlTableCell> cells = row.getCells();
+                HtmlTableCell firstCell = cells.get(0);
+                String classAttr = firstCell.getAttribute("class");
+                if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
 
-                String controlSyndRef = "syndicate.php?id=0";
-                String areaRef = "";
-                String objectRef = firstCell
-                        .getChildNodes()
-                        .get(0)
-                        .getAttributes()
-                        .getNamedItem("href")
-                        .getNodeValue();
-                if (objectRef.contains("syndicate.php?id")) {
-                    controlSyndRef = objectRef;
-                    objectRef = firstCell
+                    String controlSyndRef = "syndicate.php?id=0";
+                    String areaRef = "";
+                    String objectRef = firstCell
                             .getChildNodes()
-                            .get(1)
+                            .get(0)
                             .getAttributes()
                             .getNamedItem("href")
                             .getNodeValue();
-                    areaRef = firstCell
+                    if (objectRef.contains("syndicate.php?id")) {
+                        controlSyndRef = objectRef;
+                        objectRef = firstCell
+                                .getChildNodes()
+                                .get(1)
+                                .getAttributes()
+                                .getNamedItem("href")
+                                .getNodeValue();
+                        areaRef = firstCell
+                                .getChildNodes()
+                                .get(2)
+                                .asText();
+                    }
+
+                    String ownerSyndRef = cells.get(1)
                             .getChildNodes()
-                            .get(2)
-                            .asText();
-                }
+                            .get(0)
+                            .getChildNodes()
+                            .get(0)
+                            .getChildNodes()
+                            .get(0)
+                            .getAttributes()
+                            .getNamedItem("href")
+                            .getNodeValue();
 
-                String ownerSyndRef = cells.get(1)
-                        .getChildNodes()
-                        .get(0)
-                        .getChildNodes()
-                        .get(0)
-                        .getChildNodes()
-                        .get(0)
-                        .getAttributes()
-                        .getNamedItem("href")
-                        .getNodeValue();
-
-                int ownerSyndId = 0;
-                if (ownerSyndRef.contains("syndicate.php?id")) {
-                    ownerSyndId = Integer.parseInt(ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
-                }
-                int controlSyndId = Integer.parseInt(controlSyndRef.substring(controlSyndRef.indexOf("=") + 1));
-                int area = 0;
-                if (areaRef.contains("(")) {
-                    area = Integer.parseInt(areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
-                }
-                if (enemySynd.contains(controlSyndId)) {
-                    Building building = new Building();
-                    building.setRef("http://www.gwars.ru" + objectRef);
-                    building.setOwnerSynd(ownerSyndId);
-                    building.setControlSynd(controlSyndId);
-                    building.setSektorUrl(url);
-                    building.setArea(area);
-                    buildings.add(building);
-                    logs.put("add to list: ",
-                            String.format("objRef=%s ownerSynd=%s controlSyndRef=%s", objectRef, ownerSyndRef, controlSyndRef));
+                    int ownerSyndId = 0;
+                    if (ownerSyndRef.contains("syndicate.php?id")) {
+                        ownerSyndId = Integer.parseInt(ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
+                    }
+                    int controlSyndId = Integer.parseInt(controlSyndRef.substring(controlSyndRef.indexOf("=") + 1));
+                    int area = 0;
+                    if (areaRef.contains("(")) {
+                        area = Integer.parseInt(areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
+                    }
+                    if (enemySynd.contains(controlSyndId)) {
+                        Building building = new Building();
+                        building.setRef("http://www.gwars.ru" + objectRef);
+                        building.setOwnerSynd(ownerSyndId);
+                        building.setControlSynd(controlSyndId);
+                        building.setSektorUrl(url);
+                        building.setArea(area);
+                        buildings.add(building);
+                    }
                 }
             }
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("<<< --- <<< --- page not readable url={} --->>> --- >>>", url);
+            notReadablePages.add(url);
+        } catch (IOException | InterruptedException ex) {
+            LOGGER.error("getSektorObject(): error loading page url={}", url);
         }
     }
 
@@ -150,12 +140,11 @@ public class GwConsumer {
             String value = table.getRow(0).asText();
             value = value.substring(value.indexOf("#") + 1, value.length() - 1);
             return Integer.parseInt(value);
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("<<< --- age not readable url={} --->>>", url);
+            notReadablePages.add(url);
         } catch (IOException ex) {
             LOGGER.error("error loading object info");
-            logs.put("getBuildingOwnerSyndicateId()", "error loading object info - " + url);
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            LOGGER.error("getOwnerSyndicateId(): error reading url: {}", url);
-            logs.put("getOwnerSyndicateId(): error reading url: {}", url);
         }
         return 0;
     }
@@ -191,66 +180,18 @@ public class GwConsumer {
                 Integer sindId = Integer.parseInt(sind);
                 result.put("http://www.gwars.ru" + objectRef, sindId);
             }
-
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("<<< --- page not readable url={} --->>>", url);
+            notReadablePages.add(url);
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            LOGGER.error("get1635TargetStrings(): error reading url: {}", url);
         }
 
         return result;
     }
 
-    public double getRibaMinPrice() {
-        try {
-            HtmlTable table = getRibaHtmlTable();
-            List<HtmlTableRow> rows = table.getRows();
-            HtmlTableRow row = rows.get(3);
-            List<HtmlTableCell> cells = row.getCells();
-            HtmlTableCell cell = cells.get(0);
-            double price = fetchPrice(cell.asText());
-            HtmlTableCell cell2 = cells.get(1);
-            double count = Integer.parseInt(cell2.asText());
-            return price / count;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
-
-    public void fetchRibaPrice() {
-        try {
-            HtmlTable table = getRibaHtmlTable();
-            List<HtmlTableRow> rows = table.getRows();
-            for (int i = 3; i < rows.size(); i++) {
-                HtmlTableRow row = rows.get(i);
-                List<HtmlTableCell> cells = row.getCells();
-                HtmlTableCell cell = cells.get(0);
-                double price = fetchPrice(cell.asText());
-                HtmlTableCell cell2 = cells.get(1);
-                double count = Integer.parseInt(cell2.asText());
-
-            }
-        } catch (IOException ex) {
-            LOGGER.error("error fetching HtmlTable", ex);
-        }
-
-    }
-
-    private int fetchPrice(String s) {
-        s = s.substring(0, s.indexOf("$")).replace(",", "");
-        return Integer.parseInt(s);
-    }
-
-    private HtmlTable getRibaHtmlTable() throws IOException {
-        final HtmlPage riba = webClient.getPage("https://www.gwars.ru/market.php?stage=2&item_id=perch&action_id=1&island=0");
-        return (HtmlTable) riba.getByXPath("//table[@class='withborders']").get(0);
-
-    }
-
-    public Map<String, String> getLogs() {
-        return logs;
+    public Set<String> getNotReadablePages() {
+        return notReadablePages;
     }
 
     public LocalDateTime getAtackTime(int buildingId) {
@@ -267,9 +208,11 @@ public class GwConsumer {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
                 return LocalDateTime.parse(atackTimeString, formatter);
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("<<< --- page not readable url={} --->>>", url);
+            notReadablePages.add(url);
+        } catch (IOException ex) {
+            LOGGER.error("error getting attack time", ex);
         }
 
         return LocalDateTime.MIN;
@@ -288,11 +231,13 @@ public class GwConsumer {
             if (value.contains("#")) {
                 staticControlSyndId = Integer.parseInt(value.substring(value.lastIndexOf("#") + 1, value.length() - 1));
             }
-
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            LOGGER.error("<<< --- page not readable url={} --->>>", url);
+            notReadablePages.add(url);
         } catch (NumberFormatException ex) {
             LOGGER.error("error parsing string: {}", ex.getLocalizedMessage());
         } catch (IOException | InterruptedException e) {
-            logs.put("getStaticControlSyndId()", e.getMessage());
+            LOGGER.error("error reading url={}", url);
         }
         return staticControlSyndId;
     }
