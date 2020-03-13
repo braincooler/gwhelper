@@ -1,98 +1,56 @@
 package de.braincooler.gwhelper.service;
 
 import de.braincooler.gwhelper.consumer.Building;
+import de.braincooler.gwhelper.consumer.BuildingRepository;
 import de.braincooler.gwhelper.consumer.BuildingResponse;
 import de.braincooler.gwhelper.consumer.GwConsumer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
 public class GwService {
-    private static final String HTML_LINK = "<a href=\"%s\" target=\"_blank\">%s</a>";
-    private static final Set<Integer> SYND_INC = new HashSet<>(Arrays.asList(15));
     private static List<Integer> enemySyndTop = Arrays.asList(6363, 592, 5353, 1677);
 
     private final GwConsumer gwConsumer;
-    // link - syndId
-    private Map<String, Integer> targets;
-    private Map<String, Integer> targetsWithoutTurrel;
-    private List<Building> buildingsReadyForAttack = new ArrayList<>();
+    private final BuildingRepository buildingRepository;
 
-    public GwService(GwConsumer gwConsumer) {
+    public GwService(GwConsumer gwConsumer, BuildingRepository buildingRepository) {
         this.gwConsumer = gwConsumer;
-        targets = new HashMap<>();
-        targetsWithoutTurrel = new HashMap<>();
-    }
-
-    //@Scheduled(fixedDelay = 620000)
-    public void updateTargets() {
-        targets = gwConsumer.getMapTargetBuildingAndSyndId();
-        targetsWithoutTurrel.clear();
-        targets.keySet().forEach(link -> {
-            int ownerSyndicate = gwConsumer.getBuildingOwnerSyndicateId(link);
-            if (SYND_INC.contains(ownerSyndicate) || ownerSyndicate != targets.get(link)) {
-                targetsWithoutTurrel.put(link, targets.get(link));
-            }
-        });
+        this.buildingRepository = buildingRepository;
     }
 
     public String getTargetLinks() {
         AtomicReference<String> resultBody = new AtomicReference<>("");
-        targetsWithoutTurrel.keySet().forEach(link -> {
-            resultBody.set(resultBody + String.format(HTML_LINK, link, targets.get(link)) + "</br>");
+        buildingRepository.findAll().forEach(building -> {
+            resultBody.set(resultBody + building.getAsHtmlTr());
         });
 
         return getHtmlSite(resultBody.get());
     }
 
-    private String getHtmlSite(String body) {
-        return "<!DOCTYPE html>\n" +
-                "<html lang=\"en\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <title>1635</title>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "<h3>" +
-                "\n" + body +
-                "</h3>" +
-                "</body>\n" +
-                "</html>";
-    }
 
     public BuildingResponse getBuildingsReadyForAttack() {
-        return new BuildingResponse(buildingsReadyForAttack.size(), buildingsReadyForAttack);
+        List<Building> buildings = buildingRepository.findAll();
+        return new BuildingResponse(buildings.size(), buildings, gwConsumer.getNotReadablePages());
     }
 
     public BuildingResponse getBuildingsReadyForAttackNoTop() {
-        List<Building> buildingsNoTop = buildingsReadyForAttack.stream()
+        List<Building> buildingsNoTop = buildingRepository.findAll().stream()
                 .filter(building -> !enemySyndTop.contains(building.getControlSynd()))
                 .collect(Collectors.toList());
-        return new BuildingResponse(buildingsNoTop.size(), buildingsNoTop);
+        return new BuildingResponse(buildingsNoTop.size(), buildingsNoTop, gwConsumer.getNotReadablePages());
     }
 
-    @Scheduled(fixedDelay = 1200000, initialDelay = 5000) // 20 min
+    @Scheduled(fixedDelay = 3600000, initialDelay = 1000) // 20 min
     private void initBuildingsReadyForAttack() {
-        List<Building> sektorBuilings = gwConsumer.getSektorBuilings().stream()
-                .filter(building -> building.getControlSynd() != building.getStaticControlsyndId())
-                .collect(Collectors.toList());
-        buildingsReadyForAttack = sektorBuilings.stream()
-                .filter(building -> {
-                    LocalDateTime nextAtackTime = getAtackTime(building.getId());
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    return nextAtackTime.isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-                })
-                .collect(Collectors.toList());
+        gwConsumer.initSektorObjects();
     }
 
     public Set<String> getLogs() {
@@ -103,7 +61,82 @@ public class GwService {
         return gwConsumer.getAtackTime(buildingId);
     }
 
-    public int getStaticControlSyndId(int buildingId) {
-        return gwConsumer.getStaticControlSyndId(buildingId);
+    public String getBuildingInfo(int buildingId) {
+        return gwConsumer.getBuildingInfo(buildingId);
+    }
+
+    private String getHtmlSite(String body) {
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<title>Sort a HTML Table Alphabetically</title>\n" +
+                "<style>\n" +
+                "table {\n" +
+                "  border-spacing: 0;\n" +
+                "  width: 100%;\n" +
+                "  border: 1px solid #ddd;\n" +
+                "}\n" +
+                "th {\n" +
+                "  cursor: pointer;\n" +
+                "}\n" +
+                "th, td {\n" +
+                "  text-align: left;\n" +
+                "  padding: 16px;\n" +
+                "}\n" +
+                "tr:nth-child(even) {\n" +
+                "  background-color: #f2f2f2\n" +
+                "}\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "<table id=\"myTable\">\n" +
+                "  <tr>  \n" +
+                "    <th onclick=\"sortTable(0)\">Недвижимость</th>\n" +
+                "    <th onclick=\"sortTable(1)\">Cиндикат</th>\n" +
+                "    <th onclick=\"sortTable(2)\">Площадь</th>\n" +
+                "  </tr>\n" +
+                body +
+                "</table>\n" +
+                "<script>\n" +
+                "function sortTable(n) {\n" +
+                "  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;\n" +
+                "  table = document.getElementById(\"myTable\");\n" +
+                "  switching = true;\n" +
+                "  dir = \"asc\"; \n" +
+                "  while (switching) {\n" +
+                "    switching = false;\n" +
+                "    rows = table.rows;\n" +
+                "    for (i = 1; i < (rows.length - 1); i++) {\n" +
+                "      shouldSwitch = false;\n" +
+                "      x = rows[i].getElementsByTagName(\"TD\")[n];\n" +
+                "      y = rows[i + 1].getElementsByTagName(\"TD\")[n];\n" +
+                "      if (dir == \"asc\") {\n" +
+                "        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {\n" +
+                "          shouldSwitch= true;\n" +
+                "          break;\n" +
+                "        }\n" +
+                "      } else if (dir == \"desc\") {\n" +
+                "        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {\n" +
+                "          shouldSwitch = true;\n" +
+                "          break;\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "    if (shouldSwitch) {\n" +
+                "      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);\n" +
+                "      switching = true;\n" +
+                "      switchcount ++;      \n" +
+                "    } else {\n" +
+                "      \n" +
+                "      if (switchcount == 0 && dir == \"asc\") {\n" +
+                "        dir = \"desc\";\n" +
+                "        switching = true;\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n" +
+                "</script>\n" +
+                "</body>\n" +
+                "</html>\n";
     }
 }

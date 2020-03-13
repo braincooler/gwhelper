@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,19 +26,15 @@ public class GwConsumer {
             7351, 7119, 9563, 5352, 3667, 7161, 309, 1539, 6001, 103, 6776, 2150, 1752, 5300, 1378, 9469);
 
     private WebClient webClient;
-    private CredService credService;
+    private final CredService credService;
+    private final BuildingRepository buildingRepository;
 
-    private List<Building> buildings = new ArrayList<>();
     private Set<String> notReadablePages = new HashSet<>();
 
-    public GwConsumer(CredService credService) {
+    public GwConsumer(CredService credService, BuildingRepository buildingRepository) {
         this.credService = credService;
+        this.buildingRepository = buildingRepository;
         initWebClient();
-    }
-
-    public List<Building> getSektorBuilings() {
-        initSektorObjects();
-        return new ArrayList<>(buildings);
     }
 
     public void initSektorObjects() {
@@ -45,9 +42,7 @@ public class GwConsumer {
             for (int j = 47; j <= 53; j++) {
                 LOGGER.info("---------------------------------------------------------------");
                 LOGGER.info("init x={}, y={}", i, j);
-                LOGGER.info("plants..");
                 initBuildingsFromSektorPage(i, j, "plants");
-                LOGGER.info("tech..");
                 initBuildingsFromSektorPage(i, j, "tech");
                 LOGGER.info("---------------------------------------------------------------");
             }
@@ -58,6 +53,7 @@ public class GwConsumer {
         String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=%s", sektorX, sektorY, type);
 
         HtmlPage htmlPage;
+
         try {
             LOGGER.info("init buildings from url={}", url);
             Thread.sleep(500);
@@ -65,6 +61,7 @@ public class GwConsumer {
             HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
             List<HtmlTableRow> tableRows = table.getRows();
+            LOGGER.info(" -- {} {} -- ", tableRows.size(), type);
             for (int i = 2; i < tableRows.size(); i++) {
                 HtmlTableRow row = tableRows.get(i);
                 List<HtmlTableCell> cells = row.getCells();
@@ -114,20 +111,34 @@ public class GwConsumer {
                     if (areaRef.contains("(")) {
                         area = Integer.parseInt(areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
                     }
+
                     if (enemySynd.contains(controlSyndId)) {
                         Building building = new Building();
                         building.setRef("http://www.gwars.ru" + objectRef);
-                        building.setOwnerSynd(ownerSyndId);
-                        building.setControlSynd(controlSyndId);
-                        building.setSektorUrl(url);
-                        building.setArea(area);
-                        building.setStaticControlsyndId(getStaticControlSyndId(building.getId()));
-                        buildings.add(building);
+                        LocalDateTime readyForAtackTime = getAtackTime(building.getId());
+                        if (readyForAtackTime.isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow")))) {
+
+                            String buildingInfo = getBuildingInfo(building.getId());
+                            building.setOwnerSynd(ownerSyndId);
+                            building.setControlSynd(controlSyndId);
+                            building.setSektorUrl(url);
+                            building.setArea(area);
+                            building.setStaticControlsyndId(
+                                    buildingInfo.contains("#") ?
+                                            Integer.parseInt(buildingInfo.substring(buildingInfo.lastIndexOf("#") + 1, buildingInfo.length() - 1))
+                                            : 0);
+                            building.setDescription(buildingInfo);
+                            if (building.getControlSynd() != building.getStaticControlsyndId() &&
+                                    !buildingInfo.contains("Сектор [G]")) {
+                                LOGGER.info("--> new target ->> {}", building.getRef());
+                                buildingRepository.save(building);
+                            }
+                        }
                     }
                 }
             }
         } catch (ArrayIndexOutOfBoundsException ex) {
-            LOGGER.error("<<< --- <<< --- page not readable url={} --->>> --- >>>", url);
+            LOGGER.error("<<< --- page not readable url={} --- >>>", url);
             notReadablePages.add(url);
         } catch (IOException | InterruptedException ex) {
             LOGGER.error("getSektorObject(): error loading page url={}", url);
@@ -142,7 +153,7 @@ public class GwConsumer {
             value = value.substring(value.indexOf("#") + 1, value.length() - 1);
             return Integer.parseInt(value);
         } catch (ArrayIndexOutOfBoundsException ex) {
-            LOGGER.error("<<< --- age not readable url={} --->>>", url);
+            LOGGER.error("<<< --- page not readable url={} --->>>", url);
             notReadablePages.add(url);
         } catch (IOException ex) {
             LOGGER.error("error loading object info");
@@ -191,13 +202,10 @@ public class GwConsumer {
         return result;
     }
 
-    public Set<String> getNotReadablePages() {
-        return notReadablePages;
-    }
-
     public LocalDateTime getAtackTime(int buildingId) {
         String url = "http://www.gwars.ru/objectworkers.php?id=" + buildingId;
         try {
+            Thread.sleep(500);
             final HtmlPage page = webClient.getPage(url);
             List<HtmlNoBreak> byXPath = page.getByXPath("//nobr");
             List<HtmlNoBreak> timeNoBrs = byXPath.stream()
@@ -212,26 +220,21 @@ public class GwConsumer {
         } catch (ArrayIndexOutOfBoundsException ex) {
             LOGGER.error("<<< --- page not readable url={} --->>>", url);
             notReadablePages.add(url);
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             LOGGER.error("error getting attack time", ex);
         }
 
         return LocalDateTime.MIN;
     }
 
-    public int getStaticControlSyndId(int buildingId) {
+    public String getBuildingInfo(int buildingId) {
         String url = "http://www.gwars.ru/object.php?id=" + buildingId;
-        LOGGER.info("getStaticControlSyndId() " + url);
-        int staticControlSyndId = 0;
+        String value = "";
         try {
             Thread.sleep(500);
             final HtmlPage page = webClient.getPage(url);
             HtmlTable table = (HtmlTable) page.getByXPath("/html/body/div[3]/table[2]/tbody/tr/td/table[1]").get(0);
-            String value = table.getRow(0).asText();
-            LOGGER.info(" -> value={}", value);
-            if (value.contains("#")) {
-                staticControlSyndId = Integer.parseInt(value.substring(value.lastIndexOf("#") + 1, value.length() - 1));
-            }
+            return table.getRow(0).asText();
         } catch (ArrayIndexOutOfBoundsException ex) {
             LOGGER.error("<<< --- page not readable url={} --->>>", url);
             notReadablePages.add(url);
@@ -240,7 +243,11 @@ public class GwConsumer {
         } catch (IOException | InterruptedException e) {
             LOGGER.error("error reading url={}", url);
         }
-        return staticControlSyndId;
+        return value;
+    }
+
+    public Set<String> getNotReadablePages() {
+        return new HashSet<>(notReadablePages);
     }
 
     private void initWebClient() {

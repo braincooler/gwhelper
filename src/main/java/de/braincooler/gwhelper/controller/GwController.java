@@ -17,17 +17,17 @@ public class GwController {
         this.gwService = gwService;
     }
 
-    //@GetMapping
+    @GetMapping
     public ResponseEntity<?> getTargets() {
         return ResponseEntity.ok(gwService.getTargetLinks());
     }
 
-    @GetMapping(path = "/atack")
+    //@GetMapping(path = "/atack")
     public ResponseEntity<?> getBuildingsReadyForAttack() {
         return ResponseEntity.ok(gwService.getBuildingsReadyForAttack());
     }
 
-    @GetMapping(path = "/atack/notop")
+    //@GetMapping(path = "/atack/notop")
     public ResponseEntity<?> getBuildingsReadyForAttackNoTop() {
         return ResponseEntity.ok(gwService.getBuildingsReadyForAttackNoTop());
     }
@@ -42,8 +42,8 @@ public class GwController {
         return ResponseEntity.ok(gwService.getAtackTime(buildingId));
     }
 
-    @GetMapping(path = "/test/{buildingId}")
+    //@GetMapping(path = "/test/{buildingId}")
     public ResponseEntity<?> getTest(@PathVariable int buildingId) {
-        return ResponseEntity.ok(gwService.getStaticControlSyndId(buildingId));
+        return ResponseEntity.ok(gwService.getBuildingInfo(buildingId));
     }
 }

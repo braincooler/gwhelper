@@ -7,6 +7,26 @@ public class Building {
     private int area;
     private String sektorUrl;
     private int staticControlsyndId;
+    private String description;
+
+    public String getAsHtmlTr() {
+        String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
+        String link = String.format(linkTemplate, ref, description);
+        return String.format("<tr>\n" +
+                "    <td>%s</td>\n" +
+                "    <td>%d</td>\n" +
+                "    <td>%d</td>\n" +
+                "  </tr>", link, controlSynd, area
+        );
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public int getStaticControlsyndId() {
         return staticControlsyndId;
