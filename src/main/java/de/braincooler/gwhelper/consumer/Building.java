@@ -6,6 +6,15 @@ public class Building {
     private String ref;
     private int area;
     private String sektorUrl;
+    private int staticControlsyndId;
+
+    public int getStaticControlsyndId() {
+        return staticControlsyndId;
+    }
+
+    public void setStaticControlsyndId(int staticControlsyndId) {
+        this.staticControlsyndId = staticControlsyndId;
+    }
 
     public int getId() {
         return Integer.parseInt(ref.substring(ref.indexOf("=") + 1));

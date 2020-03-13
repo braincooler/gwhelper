@@ -5,13 +5,17 @@ import com.gargoylesoftware.css.parser.CSSException;
 import com.gargoylesoftware.css.parser.CSSParseException;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.config.CredService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -40,17 +44,17 @@ public class GwConsumer {
         return new ArrayList<>(buildings);
     }
 
-    //@Scheduled(fixedDelay = 600000)
+    @Scheduled(fixedDelay = 600000)
     public void initSektorObjects() {
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
                 try {
                     LOGGER.info("init plants x={}, y={}", i, j);
+                    Thread.sleep(500);
                     initBuildingsFromSektorPage(i, j, "plants");
-                    Thread.sleep(600);
                     LOGGER.info("init tech x={}, y={}", i, j);
+                    Thread.sleep(500);
                     initBuildingsFromSektorPage(i, j, "tech");
-                    Thread.sleep(600);
                 } catch (Exception ex) {
                     LOGGER.error("initSektorObjects()", ex);
                 }
@@ -63,9 +67,13 @@ public class GwConsumer {
 
         HtmlPage htmlPage = null;
         try {
-            htmlPage = webClient.getPage(url);
+            LOGGER.info("url={}", url);
+            WebRequest webRequest = new WebRequest(new URL(url));
+            webRequest.setCharset(StandardCharsets.UTF_8);
+            htmlPage = webClient.getPage(webRequest);
         } catch (IOException ex) {
-            LOGGER.error("getSektorObject(): error loading page");
+            ex.printStackTrace();
+            LOGGER.error("getSektorObject(): error loading page url={}", url);
         }
         HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
@@ -98,7 +106,6 @@ public class GwConsumer {
                             .getChildNodes()
                             .get(2)
                             .asText();
-
                 }
 
                 String ownerSyndRef = cells.get(1)
@@ -242,8 +249,62 @@ public class GwConsumer {
 
     }
 
+    public Map<String, String> getLogs() {
+        return logs;
+    }
+
+    public LocalDateTime getAtackTime(int buildingId) {
+        String url = "http://www.gwars.ru/objectworkers.php?id=" + buildingId;
+        try {
+            final HtmlPage page = webClient.getPage(url);
+            List<HtmlNoBreak> byXPath = page.getByXPath("//nobr");
+            List<HtmlNoBreak> timeNoBrs = byXPath.stream()
+                    .filter(htmlNoBreak -> htmlNoBreak.asText().contains("Следующее нападение возможно после"))
+                    .collect(Collectors.toList());
+            if (timeNoBrs.size() > 0) {
+                String atackTimeString = timeNoBrs.get(0).asText();
+                atackTimeString = atackTimeString.substring(atackTimeString.indexOf("после ") + 6, atackTimeString.length() - 1);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+                return LocalDateTime.parse(atackTimeString, formatter);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return LocalDateTime.MIN;
+    }
+
+    public int getStaticControlSyndId(int buildingId) {
+        String url = "http://www.gwars.ru/object.php?id=" + buildingId;
+        LOGGER.info("getStaticControlSyndId() " + url);
+        int staticControlSyndId = 0;
+        try {
+            Thread.sleep(500);
+            final HtmlPage page = webClient.getPage(url);
+            HtmlTable table = (HtmlTable) page.getByXPath("/html/body/div[3]/table[2]/tbody/tr/td/table[1]").get(0);
+            String value = table.getRow(0).asText();
+            LOGGER.info(" -> value={}", value);
+            if (value.contains("#")) {
+                staticControlSyndId = Integer.parseInt(value.substring(value.lastIndexOf("#") + 1, value.length() - 1));
+            }
+
+        } catch (NumberFormatException ex) {
+            LOGGER.error("error parsing string: {}", ex.getLocalizedMessage());
+        } catch (IOException | InterruptedException e) {
+            logs.put("getStaticControlSyndId()", e.getMessage());
+        }
+        return staticControlSyndId;
+    }
+
     private void initWebClient() {
-        this.webClient = new WebClient(BrowserVersion.BEST_SUPPORTED);
+        this.webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER);
+        this.webClient.getOptions().setJavaScriptEnabled(false);
+        this.webClient.getOptions().setThrowExceptionOnScriptError(false);
+        this.webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        this.webClient.getOptions().setCssEnabled(false);
+        this.webClient.getOptions().setDownloadImages(false);
+
         webClient.setCssErrorHandler(new CSSErrorHandler() {
             @Override
             public void warning(CSSParseException e) throws CSSException {
@@ -275,31 +336,5 @@ public class GwConsumer {
         } catch (IOException ex) {
             LOGGER.error("error initializing web client", ex);
         }
-    }
-
-    public Map<String, String> getLogs() {
-        return logs;
-    }
-
-    public LocalDateTime getAtackTime(int buildingId) {
-        String url = "http://www.gwars.ru/objectworkers.php?id=" + buildingId;
-        try {
-            final HtmlPage page = webClient.getPage(url);
-            List<HtmlNoBreak> byXPath = page.getByXPath("//nobr");
-            List<HtmlNoBreak> timeNoBrs = byXPath.stream()
-                    .filter(htmlNoBreak -> htmlNoBreak.asText().contains("Следующее нападение возможно после"))
-                    .collect(Collectors.toList());
-            if (timeNoBrs.size() > 0) {
-                String atackTimeString = timeNoBrs.get(0).asText();
-                atackTimeString = atackTimeString.substring(atackTimeString.indexOf("после ") + 6, atackTimeString.length() - 1);
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
-                return LocalDateTime.parse(atackTimeString, formatter);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return LocalDateTime.MIN;
     }
 }

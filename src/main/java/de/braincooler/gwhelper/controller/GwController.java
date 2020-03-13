@@ -41,4 +41,9 @@ public class GwController {
     public ResponseEntity<?> getAttackTime(@PathVariable int buildingId) {
         return ResponseEntity.ok(gwService.getAtackTime(buildingId));
     }
+
+    @GetMapping(path = "/test/{buildingId}")
+    public ResponseEntity<?> getTest(@PathVariable int buildingId) {
+        return ResponseEntity.ok(gwService.getStaticControlSyndId(buildingId));
+    }
 }

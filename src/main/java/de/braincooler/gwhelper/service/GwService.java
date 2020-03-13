@@ -77,10 +77,10 @@ public class GwService {
         return new BuildingResponse(buildingsNoTop.size(), buildingsNoTop);
     }
 
-    @Scheduled(fixedDelay = 600000) // 10 min
+    @Scheduled(fixedDelay = 1200000) // 20 min
     private void initBuildingsReadyForAttack() {
         List<Building> sektorBuilings = gwConsumer.getSektorBuilings().stream()
-                .filter(building -> building.getControlSynd() != building.getOwnerSynd())
+                .filter(building -> building.getControlSynd() != getStaticControlSyndId(building.getId()))
                 .collect(Collectors.toList());
         buildingsReadyForAttack = sektorBuilings.stream()
                 .filter(building -> {
@@ -101,5 +101,9 @@ public class GwService {
 
     public LocalDateTime getAtackTime(int buildingId) {
         return gwConsumer.getAtackTime(buildingId);
+    }
+
+    public int getStaticControlSyndId(int buildingId) {
+        return gwConsumer.getStaticControlSyndId(buildingId);
     }
 }
