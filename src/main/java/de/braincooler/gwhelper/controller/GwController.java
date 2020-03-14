@@ -27,11 +27,6 @@ public class GwController {
         return ResponseEntity.ok(gwService.getBuildingsReadyForAttack());
     }
 
-    //@GetMapping(path = "/atack/notop")
-    public ResponseEntity<?> getBuildingsReadyForAttackNoTop() {
-        return ResponseEntity.ok(gwService.getBuildingsReadyForAttackNoTop());
-    }
-
     @GetMapping(path = "/logs")
     public ResponseEntity<?> getLogs() {
         return ResponseEntity.ok(gwService.getLogs());

@@ -8,16 +8,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 public class GwService {
-    private static List<Integer> enemySyndTop = Arrays.asList(6363, 592, 5353, 1677);
-
     private final GwConsumer gwConsumer;
     private final BuildingRepository buildingRepository;
 
@@ -41,14 +37,7 @@ public class GwService {
         return new BuildingResponse(buildings.size(), buildings, gwConsumer.getNotReadablePages());
     }
 
-    public BuildingResponse getBuildingsReadyForAttackNoTop() {
-        List<Building> buildingsNoTop = buildingRepository.findAll().stream()
-                .filter(building -> !enemySyndTop.contains(building.getControlSynd()))
-                .collect(Collectors.toList());
-        return new BuildingResponse(buildingsNoTop.size(), buildingsNoTop, gwConsumer.getNotReadablePages());
-    }
-
-    @Scheduled(fixedDelay = 3600000, initialDelay = 1000) // 20 min
+    @Scheduled(fixedDelay = 20 * 60 * 1000, initialDelay = 1000) // 20 min
     private void initBuildingsReadyForAttack() {
         gwConsumer.initSektorObjects();
     }
@@ -69,7 +58,7 @@ public class GwService {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "<head>\n" +
-                "<title>Sort a HTML Table Alphabetically</title>\n" +
+                "<title>#1635</title>\n" +
                 "<style>\n" +
                 "table {\n" +
                 "  border-spacing: 0;\n" +
