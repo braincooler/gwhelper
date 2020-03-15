@@ -148,6 +148,8 @@ public class GwConsumer {
                                 !buildingInfo.contains("Сектор [G]") || building.getOwnerSynd() == 15) {
                             LOGGER.info("--> new target ->> {}", building.getRef());
                             buildingRepository.save(building);
+                        } else {
+                            buildingRepository.delete(building);
                         }
                     }
                 }
