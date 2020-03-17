@@ -9,9 +9,11 @@ import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.config.CredService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +26,9 @@ public class GwConsumer {
     private static List<Integer> enemySynd = Arrays.asList(7639, 8866, 7007, 167, 5285, 75, 4549, 7836, 7070, 7627, 9596,
             3696, 2507, 7543, 1653, 8133, 2083, 15, 6366, 6008, 3302, 7711, 9393, 116, 2589, 1079, 9884, 1414, 1608,
             7351, 7119, 9563, 5352, 3667, 7161, 309, 1539, 6001, 103, 6776, 2150, 1752, 5300, 1378, 9469);
+
+    @Value(value = "${gw.timeout.ms}")
+    private long timeout;
 
     private WebClient webClient;
     private final CredService credService;
@@ -46,7 +51,7 @@ public class GwConsumer {
 
     private HtmlPage getPage(String url) {
         try {
-            Thread.sleep(500);
+            Thread.sleep(timeout);
             return webClient.getPage(url);
         } catch (ArrayIndexOutOfBoundsException ex) {
             LOGGER.error("<<< --- page not readable url={} --->>>", url);
@@ -58,26 +63,27 @@ public class GwConsumer {
     }
 
     public void initSektorObjects() {
+        LocalDateTime timer = LocalDateTime.now();
+        LOGGER.info("<<< --- start --- >>>");
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
-                LOGGER.info("---------------------------------------------------------------");
-                LOGGER.info("init x={}, y={}", i, j);
                 initBuildingsFromSektorPage(i, j, "plants");
                 initBuildingsFromSektorPage(i, j, "tech");
-                LOGGER.info("---------------------------------------------------------------");
             }
         }
+
+        long wastedMinutes = Duration.between(timer, LocalDateTime.now()).toMillis() / 1000;
+        LOGGER.info("<<< --- end [duration={}min] --- >>>", wastedMinutes);
     }
 
     private void initBuildingsFromSektorPage(int sektorX, int sektorY, String type) {
         String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=%s", sektorX, sektorY, type);
 
-        LOGGER.info("init buildings from url={}", url);
         HtmlPage htmlPage = getPage(url);
         HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
         List<HtmlTableRow> tableRows = table.getRows();
-        LOGGER.info(" -- {} {} -- ", tableRows.size(), type);
+        LOGGER.info("[{},{}]: {} {}.", sektorX, sektorY, tableRows.size(), type);
         for (int i = 2; i < tableRows.size(); i++) {
             HtmlTableRow row = tableRows.get(i);
             List<HtmlTableCell> cells = row.getCells();
@@ -146,7 +152,6 @@ public class GwConsumer {
                         building.setDescription(buildingInfo);
                         if (building.getControlSynd() != building.getStaticControlsyndId() &&
                                 !buildingInfo.contains("Сектор [G]") || building.getOwnerSynd() == 15) {
-                            LOGGER.info("--> new target ->> {}", building.getRef());
                             buildingRepository.save(building);
                         } else {
                             buildingRepository.delete(building);
