@@ -9,11 +9,15 @@ public class Building {
     private int staticControlsyndId;
     private String description;
 
+
     public String getAsHtmlTr() {
+        String syndSignLinkTemplate = "<img src=\"https://images.gwars.ru/img/synds/%s.gif\" width=\"20\" height=\"14\" border=\"0\" class=\"usersign\" title=\"#%s\">";
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
         String buildingLink = String.format(linkTemplate, ref, description);
         String controlSyndOnlineLink = String.format("http://www.gwars.ru/syndicate.php?id=%d&page=online", controlSynd);
-        String constrolSindLink = String.format(linkTemplate, controlSyndOnlineLink, controlSynd);
+        String constrolSindLink = String.format(linkTemplate,
+                controlSyndOnlineLink,
+                String.format(syndSignLinkTemplate, controlSynd, controlSynd));
         return String.format("<tr>\n" +
                 "    <td>%s</td>\n" +
                 "    <td>%s</td>\n" +
