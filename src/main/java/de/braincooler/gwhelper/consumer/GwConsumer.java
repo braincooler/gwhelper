@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -63,7 +62,7 @@ public class GwConsumer {
     }
 
     public void initSektorObjects() {
-        LocalDateTime timer = LocalDateTime.now();
+        LocalDateTime timerStart = LocalDateTime.now();
         LOGGER.info("<<< --- start --- >>>");
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
@@ -72,14 +71,13 @@ public class GwConsumer {
             }
         }
 
-        long wastedMinutes = Duration.between(timer, LocalDateTime.now()).toMillis() / 1000;
-        LOGGER.info("<<< --- end [duration={}min] --- >>>", wastedMinutes);
+        LOGGER.info("<<< --- end [{} - {}}] --- >>>", timerStart, LocalDateTime.now());
     }
 
     private void initBuildingsFromSektorPage(int sektorX, int sektorY, String type) {
-        String url = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=%s", sektorX, sektorY, type);
+        String sektorUrl = String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=%s", sektorX, sektorY, type);
 
-        HtmlPage htmlPage = getPage(url);
+        HtmlPage htmlPage = getPage(sektorUrl);
         HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
         List<HtmlTableRow> tableRows = table.getRows();
@@ -91,7 +89,7 @@ public class GwConsumer {
             String classAttr = firstCell.getAttribute("class");
             if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
 
-                String controlSyndRef = "syndicate.php?id=0";
+                String currentControlSyndRef = "syndicate.php?id=0";
                 String areaRef = "";
                 String objectRef = firstCell
                         .getChildNodes()
@@ -100,7 +98,7 @@ public class GwConsumer {
                         .getNamedItem("href")
                         .getNodeValue();
                 if (objectRef.contains("syndicate.php?id")) {
-                    controlSyndRef = objectRef;
+                    currentControlSyndRef = objectRef;
                     objectRef = firstCell
                             .getChildNodes()
                             .get(1)
@@ -126,24 +124,26 @@ public class GwConsumer {
 
                 int ownerSyndId = 0;
                 if (ownerSyndRef.contains("syndicate.php?id")) {
-                    ownerSyndId = Integer.parseInt(ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
+                    ownerSyndId = Integer.parseInt(
+                            ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
                 }
-                int controlSyndId = Integer.parseInt(controlSyndRef.substring(controlSyndRef.indexOf("=") + 1));
+                int currentControlSyndId = Integer.parseInt(
+                        currentControlSyndRef.substring(currentControlSyndRef.indexOf("=") + 1));
                 int area = 0;
                 if (areaRef.contains("(")) {
-                    area = Integer.parseInt(areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
+                    area = Integer.parseInt(
+                            areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
                 }
-
-                if (enemySynd.contains(controlSyndId)) {
-                    Building building = new Building();
-                    building.setRef("http://www.gwars.ru" + objectRef);
-                    LocalDateTime readyForAtackTime = getAtackTime(building.getId());
+                Building building = new Building();
+                building.setRef("http://www.gwars.ru" + objectRef);
+                if (enemySynd.contains(currentControlSyndId)) {
+                    LocalDateTime readyForAtackTime = fetchAtackTime(building.getId());
                     if (readyForAtackTime.isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow")))) {
 
-                        String buildingInfo = getBuildingInfo(building.getId());
+                        String buildingInfo = fetchBuildingInfo(building.getId());
                         building.setOwnerSynd(ownerSyndId);
-                        building.setControlSynd(controlSyndId);
-                        building.setSektorUrl(url);
+                        building.setControlSynd(currentControlSyndId);
+                        building.setSektorUrl(sektorUrl);
                         building.setArea(area);
                         building.setStaticControlsyndId(
                                 buildingInfo.contains("#") ?
@@ -157,6 +157,8 @@ public class GwConsumer {
                             buildingRepository.delete(building);
                         }
                     }
+                } else {
+                    buildingRepository.delete(building);
                 }
             }
         }
@@ -202,7 +204,7 @@ public class GwConsumer {
         return result;
     }
 
-    public LocalDateTime getAtackTime(int buildingId) {
+    public LocalDateTime fetchAtackTime(int buildingId) {
         String url = "http://www.gwars.ru/objectworkers.php?id=" + buildingId;
         HtmlPage page = getPage(url);
         List<HtmlNoBreak> byXPath = page.getByXPath("//nobr");
@@ -218,7 +220,7 @@ public class GwConsumer {
         return LocalDateTime.MIN;
     }
 
-    public String getBuildingInfo(int buildingId) {
+    public String fetchBuildingInfo(int buildingId) {
         String url = "http://www.gwars.ru/object.php?id=" + buildingId;
         HtmlPage page = getPage(url);
         HtmlTable table = (HtmlTable) page.getByXPath("/html/body/div[3]/table[2]/tbody/tr/td/table[1]").get(0);

@@ -37,7 +37,7 @@ public class GwService {
         return new BuildingResponse(buildings.size(), buildings, gwConsumer.getNotReadablePages());
     }
 
-    @Scheduled(fixedDelay = 20 * 60 * 1000, initialDelay = 1000) // 20 min
+    @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 1000) // 20 min
     private void initBuildingsReadyForAttack() {
         gwConsumer.initSektorObjects();
     }
@@ -47,11 +47,11 @@ public class GwService {
     }
 
     public LocalDateTime getAtackTime(int buildingId) {
-        return gwConsumer.getAtackTime(buildingId);
+        return gwConsumer.fetchAtackTime(buildingId);
     }
 
     public String getBuildingInfo(int buildingId) {
-        return gwConsumer.getBuildingInfo(buildingId);
+        return gwConsumer.fetchBuildingInfo(buildingId);
     }
 
     private String getHtmlSite(String body) {

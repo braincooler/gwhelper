@@ -1,5 +1,7 @@
 package de.braincooler.gwhelper.consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -9,6 +11,8 @@ import java.util.Map;
 
 @Component
 public class BuildingRepository {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildingRepository.class);
+
 
     private Map<Integer, Building> buildings;
 
@@ -21,6 +25,9 @@ public class BuildingRepository {
     }
 
     public void delete(Building building) {
+        if (buildings.containsKey(building.getId())) {
+            LOGGER.info("remove: {}", building.getRef());
+        }
         buildings.remove(building.getId());
     }
 
