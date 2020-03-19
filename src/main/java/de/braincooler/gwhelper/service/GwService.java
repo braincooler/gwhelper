@@ -1,14 +1,10 @@
 package de.braincooler.gwhelper.service;
 
-import de.braincooler.gwhelper.consumer.Building;
 import de.braincooler.gwhelper.consumer.BuildingRepository;
-import de.braincooler.gwhelper.consumer.BuildingResponse;
 import de.braincooler.gwhelper.consumer.GwConsumer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,12 +27,6 @@ public class GwService {
         return getHtmlSite(resultBody.get());
     }
 
-
-    public BuildingResponse getBuildingsReadyForAttack() {
-        List<Building> buildings = buildingRepository.findAll();
-        return new BuildingResponse(buildings.size(), buildings, gwConsumer.getNotReadablePages());
-    }
-
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 1000) // 20 min
     private void initBuildingsReadyForAttack() {
         gwConsumer.initSektorObjects();
@@ -44,14 +34,6 @@ public class GwService {
 
     public Set<String> getLogs() {
         return gwConsumer.getNotReadablePages();
-    }
-
-    public LocalDateTime getAtackTime(int buildingId) {
-        return gwConsumer.fetchAtackTime(buildingId);
-    }
-
-    public String getBuildingInfo(int buildingId) {
-        return gwConsumer.fetchBuildingInfo(buildingId);
     }
 
     private String getHtmlSite(String body) {
@@ -83,6 +65,7 @@ public class GwService {
                 "    <th onclick=\"sortTable(0)\">Недвижимость</th>\n" +
                 "    <th onclick=\"sortTable(1)\">Cиндикат</th>\n" +
                 "    <th onclick=\"sortTable(2)\">Площадь</th>\n" +
+                "    <th onclick=\"sortTable(3)\">Сектор</th>\n" +
                 "  </tr>\n" +
                 body +
                 "</table>\n" +

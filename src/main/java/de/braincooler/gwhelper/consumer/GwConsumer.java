@@ -41,13 +41,6 @@ public class GwConsumer {
         initWebClient();
     }
 
-    public Set<Integer> getSyndEnemies(int syndId) {
-        String url = "http://www.gwars.ru/syndicate.php?id=1635&page=politics";
-        HtmlPage page = getPage(url);
-        //todo
-        return new HashSet<>();
-    }
-
     private HtmlPage getPage(String url) {
         try {
             Thread.sleep(timeout);
@@ -137,10 +130,13 @@ public class GwConsumer {
                 Building building = new Building();
                 building.setRef("http://www.gwars.ru" + objectRef);
                 if (enemySynd.contains(currentControlSyndId)) {
-                    LocalDateTime readyForAtackTime = fetchAtackTime(building.getId());
+                    HtmlPage buildingLogPage = fetchBuildingLogPage(building.getId());
+                    LocalDateTime readyForAtackTime = readAtackTime(buildingLogPage);
                     if (readyForAtackTime.isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow")))) {
-
-                        String buildingInfo = fetchBuildingInfo(building.getId());
+                        HtmlPage buildingInfoPage = fetchBuildingInfoPage(building.getId());
+                        String buildingInfo = readBuildingInfo(buildingInfoPage);
+                        String sektorName = readSektorName(buildingInfoPage);
+                        building.setSektorName(sektorName);
                         building.setOwnerSynd(ownerSyndId);
                         building.setControlSynd(currentControlSyndId);
                         building.setSektorUrl(sektorUrl);
@@ -164,7 +160,17 @@ public class GwConsumer {
         }
     }
 
-    public int getBuildingOwnerSyndicateId(String url) {
+    private String readSektorName(HtmlPage buildingInfoPage) {
+        List<Object> list = buildingInfoPage.getByXPath("/html/body/div[3]/table[2]/tbody/tr/td/div");
+        if (list.size() > 0) {
+            String sektorName = ((HtmlDivision) list.get(0)).asText();
+            sektorName = sektorName.substring(sektorName.indexOf("]") + 2, sektorName.indexOf("Рабочие места"));
+            return sektorName;
+        }
+        return "no value";
+    }
+
+    public int fetchBuildingOwnerSyndicateId(String url) {
         HtmlPage site = getPage(url);
         HtmlTable table = (HtmlTable) site.getByXPath("//table").get(4);
         String value = table.getRow(0).asText();
@@ -173,7 +179,7 @@ public class GwConsumer {
     }
 
     // 1. full link 2. controlled syndicate
-    public Map<String, Integer> getMapTargetBuildingAndSyndId() {
+    public Map<String, Integer> fetchMapTargetBuildingAndSyndId() {
         String url = "http://www.gwars.ru/syndicate.php?id=1635&page=targets";
         Map<String, Integer> result = new HashMap<>();
         HtmlPage page = getPage(url);
@@ -204,10 +210,13 @@ public class GwConsumer {
         return result;
     }
 
-    public LocalDateTime fetchAtackTime(int buildingId) {
+    public HtmlPage fetchBuildingLogPage(int buildingId) {
         String url = "http://www.gwars.ru/objectworkers.php?id=" + buildingId;
-        HtmlPage page = getPage(url);
-        List<HtmlNoBreak> byXPath = page.getByXPath("//nobr");
+        return getPage(url);
+    }
+
+    public LocalDateTime readAtackTime(HtmlPage buildingLogPage) {
+        List<HtmlNoBreak> byXPath = buildingLogPage.getByXPath("//nobr");
         List<HtmlNoBreak> timeNoBrs = byXPath.stream()
                 .filter(htmlNoBreak -> htmlNoBreak.asText().contains("Следующее нападение возможно после"))
                 .collect(Collectors.toList());
@@ -220,10 +229,13 @@ public class GwConsumer {
         return LocalDateTime.MIN;
     }
 
-    public String fetchBuildingInfo(int buildingId) {
+    public HtmlPage fetchBuildingInfoPage(int buildingId) {
         String url = "http://www.gwars.ru/object.php?id=" + buildingId;
-        HtmlPage page = getPage(url);
-        HtmlTable table = (HtmlTable) page.getByXPath("/html/body/div[3]/table[2]/tbody/tr/td/table[1]").get(0);
+        return getPage(url);
+    }
+
+    public String readBuildingInfo(HtmlPage buildingPage) {
+        HtmlTable table = (HtmlTable) buildingPage.getByXPath("/html/body/div[3]/table[2]/tbody/tr/td/table[1]").get(0);
         String result = table.getRow(0).asText();
         return result == null || result.isEmpty() ? "no value" : result;
     }

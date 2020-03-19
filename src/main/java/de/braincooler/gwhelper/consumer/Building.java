@@ -8,7 +8,7 @@ public class Building {
     private String sektorUrl;
     private int staticControlsyndId;
     private String description;
-
+    private String sektorName;
 
     public String getAsHtmlTr() {
         String syndSignLinkTemplate = "<img src=\"https://images.gwars.ru/img/synds/%s.gif\" width=\"20\" height=\"14\" border=\"0\" class=\"usersign\" title=\"#%s\">";
@@ -22,8 +22,17 @@ public class Building {
                 "    <td>%s</td>\n" +
                 "    <td>%s</td>\n" +
                 "    <td>%d</td>\n" +
-                "  </tr>", buildingLink, constrolSindLink, area
+                "    <td>%s</td>\n" +
+                "  </tr>", buildingLink, constrolSindLink, area, sektorName
         );
+    }
+
+    public String getSektorName() {
+        return sektorName;
+    }
+
+    public void setSektorName(String sektorName) {
+        this.sektorName = sektorName;
     }
 
     public String getDescription() {
