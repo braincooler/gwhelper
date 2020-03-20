@@ -34,6 +34,7 @@ public class GwConsumer {
     private final BuildingRepository buildingRepository;
 
     private Set<String> notReadablePages = new HashSet<>();
+    private int counter;
 
     public GwConsumer(CredService credService, BuildingRepository buildingRepository) {
         this.credService = credService;
@@ -57,13 +58,14 @@ public class GwConsumer {
     public void initSektorObjects() {
         LocalDateTime timerStart = LocalDateTime.now();
         LOGGER.info("<<< --- start --- >>>");
+        counter = 0;
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
                 initBuildingsFromSektorPage(i, j, "plants");
                 initBuildingsFromSektorPage(i, j, "tech");
             }
         }
-
+        notReadablePages.add(String.format("buildings: %d", counter));
         LOGGER.info("<<< --- end [{} - {}}] --- >>>", timerStart, LocalDateTime.now());
     }
 
@@ -74,14 +76,13 @@ public class GwConsumer {
         HtmlTable table = (HtmlTable) htmlPage.getByXPath("//*[@id=\"mapcontents\"]/table[1]/tbody/tr/td/table[1]").get(0);
 
         List<HtmlTableRow> tableRows = table.getRows();
-        LOGGER.info("[{},{}]: {} {}.", sektorX, sektorY, tableRows.size(), type);
         for (int i = 2; i < tableRows.size(); i++) {
             HtmlTableRow row = tableRows.get(i);
             List<HtmlTableCell> cells = row.getCells();
             HtmlTableCell firstCell = cells.get(0);
             String classAttr = firstCell.getAttribute("class");
             if (!classAttr.equals("greenbg") && !classAttr.equals("greengreenbg")) {
-
+                counter++;
                 String currentControlSyndRef = "syndicate.php?id=0";
                 String areaRef = "";
                 String objectRef = firstCell
