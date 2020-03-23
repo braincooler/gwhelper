@@ -130,7 +130,7 @@ public class GwConsumer {
                 }
                 Building building = new Building();
                 building.setRef("http://www.gwars.ru" + objectRef);
-                if (enemySynd.contains(currentControlSyndId) && ownerSyndId == 1635) {
+                if (enemySynd.contains(currentControlSyndId) || ownerSyndId == 1635) {
                     HtmlPage buildingLogPage = fetchBuildingLogPage(building.getId());
                     LocalDateTime readyForAtackTime = readAtackTime(buildingLogPage);
                     if (readyForAtackTime.isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow")))) {
