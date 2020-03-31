@@ -170,10 +170,8 @@ public class GwConsumer {
 
                         building.setDescription(buildingInfo);
 
-                        if (building.getControlSynd() != building.getStaticControlsyndId() &&
-                                !buildingInfo.contains("Сектор [G]") ||
-                                building.getOwnerSynd() == 15 ||
-                                (building.getOwnerSynd() == 1635 && currentControlSyndId != 1635)) {
+                        if (currentControlSyndId != 1635 && (!buildingInfo.contains("Сектор [G]") ||
+                                building.getOwnerSynd() == 15)) {
                             buildingRepository.save(building);
                         } else {
                             buildingRepository.delete(building);

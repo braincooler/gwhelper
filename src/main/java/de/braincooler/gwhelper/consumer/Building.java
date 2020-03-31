@@ -19,11 +19,17 @@ public class Building {
                 controlSyndOnlineLink,
                 String.format(syndSignLinkTemplate, controlSynd, controlSynd));
         return String.format("<tr>\n" +
-                "    <td>%s</td>\n" +
-                "    <td>%s</td>\n" +
-                "    <td>%d</td>\n" +
-                "    <td>%s</td>\n" +
-                "  </tr>", buildingLink, constrolSindLink, area, sektorName
+                        "    <td>%s</td>\n" +
+                        "    <td>%s</td>\n" +
+                        "    <td>%d</td>\n" +
+                        "    <td>%s</td>\n" +
+                        "    <td>%s</td>\n" +
+                        "  </tr>",
+                buildingLink,
+                constrolSindLink,
+                area,
+                sektorName,
+                controlSynd == staticControlsyndId ? "+" : "-"
         );
     }
 

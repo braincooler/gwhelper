@@ -66,6 +66,7 @@ public class GwService {
                 "    <th onclick=\"sortTable(1)\">Cиндикат</th>\n" +
                 "    <th onclick=\"sortTable(2)\">Площадь</th>\n" +
                 "    <th onclick=\"sortTable(3)\">Сектор</th>\n" +
+                "    <th onclick=\"sortTable(4)\">Турель</th>\n" +
                 "  </tr>\n" +
                 body +
                 "</table>\n" +
