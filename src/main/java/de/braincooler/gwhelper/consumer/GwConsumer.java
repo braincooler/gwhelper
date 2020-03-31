@@ -118,16 +118,29 @@ public class GwConsumer {
 
                 int ownerSyndId = 0;
                 if (ownerSyndRef.contains("syndicate.php?id")) {
-                    ownerSyndId = Integer.parseInt(
-                            ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
+                    try {
+                        ownerSyndId = Integer.parseInt(ownerSyndRef.substring(ownerSyndRef.indexOf("=") + 1));
+                    } catch (NumberFormatException ex) {
+                        LOGGER.error("error parsing '{}'", ownerSyndRef);
+                    }
                 }
-                int currentControlSyndId = Integer.parseInt(
-                        currentControlSyndRef.substring(currentControlSyndRef.indexOf("=") + 1));
+                int currentControlSyndId = 0;
+                try {
+                    currentControlSyndId = Integer.parseInt(
+                            currentControlSyndRef.substring(currentControlSyndRef.indexOf("=") + 1));
+                } catch (NumberFormatException ex) {
+                    LOGGER.error("error parsing '{}'", currentControlSyndRef);
+                }
                 int area = 0;
                 if (areaRef.contains("(")) {
-                    area = Integer.parseInt(
-                            areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
+                    try {
+                        area = Integer.parseInt(
+                                areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
+                    } catch (NumberFormatException ex) {
+                        LOGGER.error("error parsing '{}'", areaRef);
+                    }
                 }
+
                 Building building = new Building();
                 building.setRef("http://www.gwars.ru" + objectRef);
                 if (enemySynd.contains(currentControlSyndId) || ownerSyndId == 1635) {
@@ -142,10 +155,20 @@ public class GwConsumer {
                         building.setControlSynd(currentControlSyndId);
                         building.setSektorUrl(sektorUrl);
                         building.setArea(area);
-                        building.setStaticControlsyndId(
-                                buildingInfo.contains("#") ?
-                                        Integer.parseInt(buildingInfo.substring(buildingInfo.lastIndexOf("#") + 1, buildingInfo.length() - 1))
-                                        : 0);
+
+                        int staticControlSyndId = 0;
+                        if (buildingInfo.contains("#")) {
+                            try {
+                                staticControlSyndId = Integer.parseInt(
+                                        buildingInfo.substring(
+                                                buildingInfo.lastIndexOf("#") + 1,
+                                                buildingInfo.length() - 1));
+                            } catch (NumberFormatException ex) {
+                                LOGGER.error("error parsing '{}'", buildingInfo);
+                            }
+                        }
+                        building.setStaticControlsyndId(staticControlSyndId);
+
                         building.setDescription(buildingInfo);
                         if (building.getControlSynd() != building.getStaticControlsyndId() &&
                                 !buildingInfo.contains("Сектор [G]") ||
