@@ -129,7 +129,7 @@ public class GwConsumer {
                     currentControlSyndId = Integer.parseInt(
                             currentControlSyndRef.substring(currentControlSyndRef.indexOf("=") + 1));
                 } catch (NumberFormatException ex) {
-                    LOGGER.error("error parsing '{}'", currentControlSyndRef);
+                    LOGGER.error("error parsing currentControlSyndRef '{}'", currentControlSyndRef);
                 }
                 int area = 0;
                 if (areaRef.contains("(")) {
@@ -137,7 +137,7 @@ public class GwConsumer {
                         area = Integer.parseInt(
                                 areaRef.substring(areaRef.indexOf("(") + 1, areaRef.indexOf(")")));
                     } catch (NumberFormatException ex) {
-                        LOGGER.error("error parsing '{}'", areaRef);
+                        LOGGER.error("error parsing areaRef'{}'", areaRef);
                     }
                 }
 
@@ -161,10 +161,9 @@ public class GwConsumer {
                             try {
                                 staticControlSyndId = Integer.parseInt(
                                         buildingInfo.substring(
-                                                buildingInfo.lastIndexOf("#") + 1,
-                                                buildingInfo.length() - 1));
+                                                buildingInfo.lastIndexOf("#") + 1));
                             } catch (NumberFormatException ex) {
-                                LOGGER.error("error parsing '{}'", buildingInfo);
+                                LOGGER.error("error parsing buildingInfo '{}'", buildingInfo);
                             }
                         }
                         building.setStaticControlsyndId(staticControlSyndId);
@@ -173,13 +172,10 @@ public class GwConsumer {
 
                         if (building.getControlSynd() != building.getStaticControlsyndId() &&
                                 !buildingInfo.contains("Сектор [G]") ||
-                                building.getOwnerSynd() == 15) {
+                                building.getOwnerSynd() == 15 ||
+                                (building.getOwnerSynd() == 1635 && currentControlSyndId != 1635)) {
                             buildingRepository.save(building);
                         } else {
-                            buildingRepository.delete(building);
-                        }
-
-                        if (building.getOwnerSynd() == 1635 && currentControlSyndId != 1635) {
                             buildingRepository.delete(building);
                         }
                     }
