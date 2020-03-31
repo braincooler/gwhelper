@@ -76,6 +76,7 @@ public class GwService {
                 "        <thead>\n" +
                 "            <tr>\n" +
                 "                <th>Недвижимость</th>\n" +
+                "                <th>Владелец</th>\n" +
                 "                <th>Cиндикат</th>\n" +
                 "                <th>Площадь</th>\n" +
                 "                <th>Сектор</th>\n" +
