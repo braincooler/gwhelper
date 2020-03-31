@@ -13,6 +13,7 @@ public class Building {
     public String getAsHtmlTr() {
         String syndSignLinkTemplate = "<img src=\"https://images.gwars.ru/img/synds/%s.gif\" width=\"20\" height=\"14\" border=\"0\" class=\"usersign\" title=\"#%s\">";
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
+
         String buildingLink = String.format(linkTemplate, ref, description);
         String controlSyndOnlineLink = String.format("http://www.gwars.ru/syndicate.php?id=%d&page=online", controlSynd);
         String constrolSindLink = String.format(linkTemplate,
@@ -26,7 +27,7 @@ public class Building {
                         "    <td>%s</td>\n" +
                         "  </tr>",
                 buildingLink,
-                constrolSindLink,
+                constrolSindLink + String.format("<a href=\"/syndicate.php?id=%d\">%d</a>", controlSynd, controlSynd),
                 area,
                 sektorName,
                 controlSynd == staticControlsyndId ? "+" : "-"

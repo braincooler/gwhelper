@@ -21,9 +21,9 @@ public class GwService {
     public String getTargetsWithoutTurel() {
         AtomicReference<String> resultBody = new AtomicReference<>("");
         buildingRepository.findAll().forEach(building -> {
-            if (building.getControlSynd() != building.getStaticControlsyndId()) {
+            //if (building.getControlSynd() != building.getStaticControlsyndId())
                 resultBody.set(resultBody + building.getAsHtmlTr());
-            }
+
         });
 
         return getHtmlSite(resultBody.get());
@@ -41,76 +41,49 @@ public class GwService {
     private String getHtmlSite(String body) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
-                "<head>\n" +
-                "<title>#1635</title>\n" +
-                "<style>\n" +
-                "table {\n" +
-                "  border-spacing: 0;\n" +
-                "  width: 100%;\n" +
-                "  border: 1px solid #ddd;\n" +
-                "}\n" +
-                "th {\n" +
-                "  cursor: pointer;\n" +
-                "}\n" +
-                "th, td {\n" +
-                "  text-align: left;\n" +
-                "  padding: 16px;\n" +
-                "}\n" +
-                "tr:nth-child(even) {\n" +
-                "  background-color: #f2f2f2\n" +
-                "}\n" +
-                "</style>\n" +
-                "</head>\n" +
                 "<body>\n" +
-                "<table id=\"myTable\">\n" +
-                "  <tr>  \n" +
-                "    <th onclick=\"sortTable(0)\">Недвижимость</th>\n" +
-                "    <th onclick=\"sortTable(1)\">Cиндикат</th>\n" +
-                "    <th onclick=\"sortTable(2)\">Площадь</th>\n" +
-                "    <th onclick=\"sortTable(3)\">Сектор</th>\n" +
-                "  </tr>\n" +
-                body +
-                "</table>\n" +
-                "<script>\n" +
-                "function sortTable(n) {\n" +
-                "  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;\n" +
-                "  table = document.getElementById(\"myTable\");\n" +
-                "  switching = true;\n" +
-                "  dir = \"asc\"; \n" +
-                "  while (switching) {\n" +
-                "    switching = false;\n" +
-                "    rows = table.rows;\n" +
-                "    for (i = 1; i < (rows.length - 1); i++) {\n" +
-                "      shouldSwitch = false;\n" +
-                "      x = rows[i].getElementsByTagName(\"TD\")[n];\n" +
-                "      y = rows[i + 1].getElementsByTagName(\"TD\")[n];\n" +
-                "      if (dir == \"asc\") {\n" +
-                "        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {\n" +
-                "          shouldSwitch= true;\n" +
-                "          break;\n" +
-                "        }\n" +
-                "      } else if (dir == \"desc\") {\n" +
-                "        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {\n" +
-                "          shouldSwitch = true;\n" +
-                "          break;\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "    if (shouldSwitch) {\n" +
-                "      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);\n" +
-                "      switching = true;\n" +
-                "      switchcount ++;      \n" +
-                "    } else {\n" +
-                "      \n" +
-                "      if (switchcount == 0 && dir == \"asc\") {\n" +
-                "        dir = \"desc\";\n" +
-                "        switching = true;\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n" +
+                "<head>\n" +
+                "\t<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css\">\n" +
+                "\t<script type=\"text/javascript\" src=\"https://code.jquery.com/jquery-3.3.1.js\"></script>\n" +
+                "\t<script type=\"text/javascript\" src=\"https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js\"></script>\n" +
+                "</head>\n" +
+
+                "<script type=\"text/javascript\">\n" +
+                "\t$(document).ready(function() {\n" +
+                "    $('#example').DataTable( {\n" +
+                "\"iDisplayLength\": 50," +
+                "        columnDefs: [ {\n" +
+                "            targets: [ 0 ],\n" +
+                "            orderData: [ 0, 1 ]\n" +
+                "        }, {\n" +
+                "            targets: [ 1 ],\n" +
+                "            orderData: [ 1, 0 ]\n" +
+                "        }, {\n" +
+                "            targets: [ 4 ],\n" +
+                "            orderData: [ 4, 0 ]\n" +
+                "        } ]\n" +
+                "    } );\n" +
+                "} );\n" +
                 "</script>\n" +
+
+                "<button onClick=\"window.location.reload();\">Refresh</button>\n </br>" +
+
+                "<table id=\"example\" class=\"display\" style=\"width:100%\">\n" +
+                "        <thead>\n" +
+                "            <tr>\n" +
+                "                <th>Недвижимость</th>\n" +
+                "                <th>Cиндикат</th>\n" +
+                "                <th>Площадь</th>\n" +
+                "                <th>Сектор</th>\n" +
+                "                <th>Турель</th>\n" +
+                "            </tr>\n" +
+                "        </thead>\n" +
+                "        <tbody>\n" +
+                body +
+                "        </tbody>\n" +
+                "    </table>\n" +
+                "\n" +
                 "</body>\n" +
-                "</html>\n";
+                "</html>";
     }
 }
