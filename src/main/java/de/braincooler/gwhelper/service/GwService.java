@@ -18,10 +18,12 @@ public class GwService {
         this.buildingRepository = buildingRepository;
     }
 
-    public String getTargetLinks() {
+    public String getTargetsWithoutTurel() {
         AtomicReference<String> resultBody = new AtomicReference<>("");
         buildingRepository.findAll().forEach(building -> {
-            resultBody.set(resultBody + building.getAsHtmlTr());
+            if (building.getControlSynd() != building.getStaticControlsyndId()) {
+                resultBody.set(resultBody + building.getAsHtmlTr());
+            }
         });
 
         return getHtmlSite(resultBody.get());
@@ -66,7 +68,6 @@ public class GwService {
                 "    <th onclick=\"sortTable(1)\">Cиндикат</th>\n" +
                 "    <th onclick=\"sortTable(2)\">Площадь</th>\n" +
                 "    <th onclick=\"sortTable(3)\">Сектор</th>\n" +
-                "    <th onclick=\"sortTable(4)\">Турель</th>\n" +
                 "  </tr>\n" +
                 body +
                 "</table>\n" +
