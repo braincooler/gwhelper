@@ -21,7 +21,7 @@ public class GwController {
         return ResponseEntity.ok(gwService.getTargetsWithoutTurel());
     }
 
-    @GetMapping
+    @GetMapping(path = "/test")
     public ResponseEntity<?> getTest() {
         return ResponseEntity.ok(gwService.getTest());
     }
