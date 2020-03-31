@@ -19,14 +19,18 @@ public class GwService {
     }
 
     public String getTargetsWithoutTurel() {
-        AtomicReference<String> resultBody = new AtomicReference<>("");
+        AtomicReference<String> trBody = new AtomicReference<>("");
         buildingRepository.findAll().forEach(building -> {
-            //if (building.getControlSynd() != building.getStaticControlsyndId())
-                resultBody.set(resultBody + building.getAsHtmlTr());
-
+            if (building.getStaticControlsyndId() == 0) {
+                if (building.getOwnerSynd() != building.getControlSynd()) {
+                    trBody.set(trBody + building.getAsHtmlTr());
+                }
+            } else if (building.getControlSynd() != building.getStaticControlsyndId()) {
+                trBody.set(trBody + building.getAsHtmlTr());
+            }
         });
 
-        return getHtmlSite(resultBody.get());
+        return buildHtmlSite(trBody.get());
     }
 
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 1000) // 20 min
@@ -38,7 +42,7 @@ public class GwService {
         return gwConsumer.getNotReadablePages();
     }
 
-    private String getHtmlSite(String body) {
+    private String buildHtmlSite(String body) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "<body>\n" +
@@ -85,5 +89,9 @@ public class GwService {
                 "\n" +
                 "</body>\n" +
                 "</html>";
+    }
+
+    public Object getTest() {
+        return null;
     }
 }
