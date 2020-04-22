@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class GwConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(GwConsumer.class);
-    private static List<Integer> enemySynd = Arrays.asList(7942, 2235, 8012, 7639, 8866, 7007, 167, 5285, 75, 4549, 7836, 7070, 7627, 9596,
+    private static List<Integer> enemySynd = Arrays.asList(5398,7942, 2235, 8012, 7639, 8866, 7007, 167, 5285, 75, 4549, 7836, 7070, 7627, 9596,
             3696, 2507, 7543, 1653, 8133, 2083, 15, 6366, 6008, 3302, 7711, 9393, 116, 2589, 1079, 9884, 1414, 1608,
             7351, 7119, 9563, 5352, 3667, 7161, 309, 1539, 6001, 103, 6776, 2150, 1752, 5300, 1378, 9469);
 
