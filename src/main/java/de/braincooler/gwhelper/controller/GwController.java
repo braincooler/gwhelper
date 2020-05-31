@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 public class GwController {
-
     private final GwService gwService;
 
     public GwController(GwService gwService) {
@@ -18,16 +17,6 @@ public class GwController {
 
     @GetMapping
     public ResponseEntity<?> getTargets() {
-        return ResponseEntity.ok(gwService.getTargetsWithoutTurel());
-    }
-
-    @GetMapping(path = "/test")
-    public ResponseEntity<?> getTest() {
-        return ResponseEntity.ok(gwService.getTest());
-    }
-
-    @GetMapping(path = "/logs")
-    public ResponseEntity<?> getLogs() {
-        return ResponseEntity.ok(gwService.getLogs());
+        return ResponseEntity.ok(gwService.getBuildingsWithoutTurel());
     }
 }

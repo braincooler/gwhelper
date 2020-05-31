@@ -1,7 +1,6 @@
-package de.braincooler.gwhelper.consumer;
+package de.braincooler.gwhelper.repository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.braincooler.gwhelper.Building;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -10,31 +9,29 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class BuildingRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildingRepository.class);
+public class BuildingRepositoryImpl implements BuildingRepository {
+    private final Map<Integer, Building> buildings;
 
-
-    private Map<Integer, Building> buildings;
-
-    public BuildingRepository() {
+    public BuildingRepositoryImpl() {
         this.buildings = new HashMap<>();
     }
 
+    @Override
     public void save(Building building) {
         buildings.put(building.getId(), building);
     }
 
+    @Override
     public void delete(Building building) {
-        if (buildings.containsKey(building.getId())) {
-            LOGGER.info("remove: {}", building.getRef());
-        }
         buildings.remove(building.getId());
     }
 
+    @Override
     public List<Building> findAll() {
         return new ArrayList<>(buildings.values());
     }
 
+    @Override
     public Building findById(int id) {
         return buildings.get(id);
     }
