@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class GwConsumer {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GwConsumer.class);
 
     private Set<Integer> enemySynd;
