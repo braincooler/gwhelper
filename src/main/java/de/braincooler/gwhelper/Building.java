@@ -1,6 +1,8 @@
 package de.braincooler.gwhelper;
 
 public class Building {
+
+    private int id;
     private int ownerSynd;
     private int controlSynd;
     private String url;
@@ -9,6 +11,10 @@ public class Building {
     private int staticControlsyndId;
     private String description;
     private String sektorName;
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getSektorName() {
         return sektorName;
