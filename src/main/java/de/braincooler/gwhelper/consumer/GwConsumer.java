@@ -14,31 +14,25 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class GwConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(GwConsumer.class);
 
-    private List<Integer> enemySynd;
+    private Set<Integer> enemySynd;
     private Map<String, String> controlledSektors;
 
     private final GwWebClient gwWebClient;
     private final BuildingJpaRepository buildingJpaRepository;
-    //private final BuildingRepository buildingRepository;
 
     public GwConsumer(GwWebClient gwWebClient,
-                      //BuildingRepository buildingRepository,
                       BuildingJpaRepository buildingJpaRepository) {
         this.buildingJpaRepository = buildingJpaRepository;
         controlledSektors = new HashMap<>();
-        enemySynd = new ArrayList<>();
+        enemySynd = new HashSet<>();
         this.gwWebClient = gwWebClient;
-        //this.buildingRepository = buildingRepository;
     }
 
     public Map<String, String> getControlledSektors() {

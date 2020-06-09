@@ -17,14 +17,11 @@ import java.util.stream.Collectors;
 public class GwService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GwService.class);
 
-    //private final BuildingRepository buildingRepository;
     private final BuildingJpaRepository buildingJpaRepository;
     private final SiteBuilder siteBuilder;
 
     public GwService(SiteBuilder siteBuilder,
-                     //BuildingRepository buildingRepository,
                      BuildingJpaRepository buildingJpaRepository) {
-        //this.buildingRepository = buildingRepository;
         this.siteBuilder = siteBuilder;
         this.buildingJpaRepository = buildingJpaRepository;
     }
