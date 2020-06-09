@@ -18,8 +18,8 @@ public class SiteBuilderImpl implements SiteBuilder {
         this.gwConsumer = gwConsumer;
     }
 
-
-    public String buildSites(List<Building> buildings) {
+    @Override
+    public String buildSite(List<Building> buildings) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "<body>\n" +
@@ -129,12 +129,5 @@ public class SiteBuilderImpl implements SiteBuilder {
                 style, building.getSektorName(),
                 building.getStaticControlsyndId() == 1635 ? "+" : "-"
         );
-    }
-
-    @Override
-    public String buildSite(List<Building> buildings) {
-        AtomicReference<String> result = new AtomicReference<>("");
-        buildings.forEach(building -> result.set(result + building.getUrl() + "</br>"));
-        return result.get();
     }
 }
