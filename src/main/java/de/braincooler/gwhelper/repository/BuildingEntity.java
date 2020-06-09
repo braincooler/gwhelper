@@ -40,6 +40,9 @@ public class BuildingEntity {
     @Column(name = "updateTimestamp")
     private Long updateTimestamp;
 
+    public BuildingEntity() {
+    }
+
     public BuildingEntity(int id,
                           int ownerSyndId,
                           int controlSyndId,

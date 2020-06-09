@@ -2,12 +2,15 @@ package de.braincooler.gwhelper.consumer;
 
 import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.Building;
-import de.braincooler.gwhelper.repository.BuildingRepository;
+import de.braincooler.gwhelper.repository.BuildingEntity;
+import de.braincooler.gwhelper.repository.BuildingJpaRepository;
+import de.braincooler.gwhelper.repository.BuildingMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -25,14 +28,17 @@ public class GwConsumer {
     private Map<String, String> controlledSektors;
 
     private final GwWebClient gwWebClient;
-    private final BuildingRepository buildingRepository;
+    private final BuildingJpaRepository buildingJpaRepository;
+    //private final BuildingRepository buildingRepository;
 
     public GwConsumer(GwWebClient gwWebClient,
-                      BuildingRepository buildingRepository) {
+                      //BuildingRepository buildingRepository,
+                      BuildingJpaRepository buildingJpaRepository) {
+        this.buildingJpaRepository = buildingJpaRepository;
         controlledSektors = new HashMap<>();
         enemySynd = new ArrayList<>();
         this.gwWebClient = gwWebClient;
-        this.buildingRepository = buildingRepository;
+        //this.buildingRepository = buildingRepository;
     }
 
     public Map<String, String> getControlledSektors() {
@@ -139,8 +145,12 @@ public class GwConsumer {
                 }
 
                 Building building = new Building();
-                building.setUrl("http://www.gwars.ru" + objectRef);
-                buildingRepository.delete(building);
+                String buildingUrl = "http://www.gwars.ru" + objectRef;
+                building.setUrl(buildingUrl);
+                building.setId(Integer.parseInt(buildingUrl.substring(buildingUrl.indexOf("=") + 1)));
+                if (buildingJpaRepository.existsById(building.getId())) {
+                    buildingJpaRepository.deleteById(building.getId());
+                }
 
                 if (enemySynd.contains(currentControlSyndId) || ownerSyndId == 1635) {
                     HtmlPage buildingLogPage = gwWebClient.fetchBuildingLogPage(building.getId());
@@ -171,9 +181,15 @@ public class GwConsumer {
 
                         if (currentControlSyndId != 1635 && (!buildingInfo.contains("Сектор [G]") ||
                                 building.getOwnerSynd() == 15)) {
-                            buildingRepository.save(building);
+                            BuildingEntity buildingEntity = BuildingMapper.toEntity(building);
+                            buildingEntity.setUpdateTimestamp(Instant.now().getEpochSecond());
+                            buildingJpaRepository.save(buildingEntity);
+                            //buildingRepository.save(building);
                         } else {
-                            buildingRepository.delete(building);
+                            if (buildingJpaRepository.existsById(building.getId())) {
+                                buildingJpaRepository.deleteById(building.getId());
+                            }
+                            //buildingRepository.delete(building);
                         }
                     }
                 }

@@ -3,8 +3,9 @@ package de.braincooler.gwhelper.repository;
 import de.braincooler.gwhelper.Building;
 
 public class BuildingMapper {
-    private static Building toDto(BuildingEntity buildingEntity) {
+    public static Building toDto(BuildingEntity buildingEntity) {
         Building building = new Building();
+        building.setSektorName(buildingEntity.getSektorName());
         building.setArea(buildingEntity.getArea());
         building.setControlSynd(buildingEntity.getControlSyndId());
         building.setDescription(buildingEntity.getDescription());
@@ -13,11 +14,13 @@ public class BuildingMapper {
         building.setSektorUrl(buildingEntity.getSektorUrl());
         building.setControlSynd(buildingEntity.getControlSyndId());
         building.setStaticControlsyndId(buildingEntity.getStaticControlSyndId());
+        String buildingUrl = "http://www.gwars.ru/object.php?id=" + buildingEntity.getId();
+        building.setUrl(buildingUrl);
 
         return building;
     }
 
-    private static BuildingEntity toEntity(Building building) {
+    public static BuildingEntity toEntity(Building building) {
 
         BuildingEntity buildingEntity = new BuildingEntity(
                 building.getId(),

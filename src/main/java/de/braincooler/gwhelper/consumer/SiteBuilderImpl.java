@@ -1,6 +1,8 @@
 package de.braincooler.gwhelper.consumer;
 
 import de.braincooler.gwhelper.Building;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class SiteBuilderImpl implements SiteBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SiteBuilderImpl.class);
+
     private final GwConsumer gwConsumer;
 
     public SiteBuilderImpl(GwConsumer gwConsumer) {
@@ -105,7 +109,7 @@ public class SiteBuilderImpl implements SiteBuilder {
                 owner = building.getDescription().substring(building.getDescription().indexOf(",") + 2);
             }
         } catch (Exception ex) {
-            System.out.println(String.format("'%s'", building.getDescription()));
+            LOGGER.error("aiteBuilderImpl: error parsing owner: {}", building.getDescription());
         }
         return String.format("<tr>\n" +
                         "    <td>%s</td>\n" +
