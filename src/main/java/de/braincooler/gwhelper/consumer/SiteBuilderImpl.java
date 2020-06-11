@@ -95,8 +95,8 @@ public class SiteBuilderImpl implements SiteBuilder {
                 controlSyndOnlineLink,
                 String.format(syndSignLinkTemplate, building.getControlSynd(), building.getControlSynd()));
         String color = "color:#00000";
-        if (gwConsumer.getControlledSektors().containsKey(building.getSektorName())) {
-            color = gwConsumer.getControlledSektors().get(building.getSektorName());
+        if (gwConsumer.getControlledSektors(building.getTargetOfSyndId()).containsKey(building.getSektorName())) {
+            color = gwConsumer.getControlledSektors(building.getTargetOfSyndId()).get(building.getSektorName());
         }
         String style = String.format("style=%s", color);
 
@@ -109,7 +109,7 @@ public class SiteBuilderImpl implements SiteBuilder {
                 owner = building.getDescription().substring(building.getDescription().indexOf(",") + 2);
             }
         } catch (Exception ex) {
-            LOGGER.error("aiteBuilderImpl: error parsing owner: {}", building.getDescription());
+            LOGGER.error("siteBuilderImpl: error parsing owner: {}", building.getDescription());
         }
         return String.format("<tr>\n" +
                         "    <td>%s</td>\n" +

@@ -22,9 +22,10 @@ public class GwService {
         this.buildingJpaRepository = buildingJpaRepository;
     }
 
-    public String getBuildingsWithoutTurel() {
+    public String getBuildingsWithoutTurel(int syndId) {
         Long timestamp = Instant.now().minusSeconds(30 * 60).getEpochSecond();
-        List<Building> buildingsWihtoutTurel = buildingJpaRepository.findByUpdateTimestampGreaterThan(timestamp).stream()
+        List<Building> buildingsWihtoutTurel = buildingJpaRepository
+                .findByUpdateTimestampGreaterThanAndTargetOfSyndIdIs(timestamp, syndId).stream()
                 .filter(buildingEntity -> buildingEntity.getControlSyndId() != buildingEntity.getStaticControlSyndId())
                 .map(BuildingMapper::toDto)
                 .collect(Collectors.toList());

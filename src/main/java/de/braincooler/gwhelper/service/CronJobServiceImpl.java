@@ -24,10 +24,14 @@ public class CronJobServiceImpl implements CronJobService {
     public void initSyndWars() {
         gwConsumer.initSyndWarsList(1635);
         gwConsumer.initControlledSektors(1635);
+
+        gwConsumer.initSyndWarsList(1637);
+        gwConsumer.initControlledSektors(1637);
     }
 
     @Override
-   // @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
+    // todo
+    // @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
     public void initControlledSektors() {
         // gwConsumer.initControlledSektors(1635);
     }

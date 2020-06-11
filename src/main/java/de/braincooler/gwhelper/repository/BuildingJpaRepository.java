@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface BuildingJpaRepository extends CrudRepository<BuildingEntity, Integer> {
-    List<BuildingEntity> findByUpdateTimestampGreaterThan(Long timestamp);
+    List<BuildingEntity> findByUpdateTimestampGreaterThanAndTargetOfSyndIdIs(Long timestamp, int targetOfSyndId);
 }
