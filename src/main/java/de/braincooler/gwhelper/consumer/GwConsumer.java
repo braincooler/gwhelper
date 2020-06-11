@@ -179,12 +179,10 @@ public class GwConsumer {
                             BuildingEntity buildingEntity = BuildingMapper.toEntity(building);
                             buildingEntity.setUpdateTimestamp(Instant.now().getEpochSecond());
                             buildingJpaRepository.save(buildingEntity);
-                            //buildingRepository.save(building);
                         } else {
                             if (buildingJpaRepository.existsById(building.getId())) {
                                 buildingJpaRepository.deleteById(building.getId());
                             }
-                            //buildingRepository.delete(building);
                         }
                     }
                 }

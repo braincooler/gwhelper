@@ -14,6 +14,7 @@ public class BuildingMapper {
         building.setSektorUrl(buildingEntity.getSektorUrl());
         building.setControlSynd(buildingEntity.getControlSyndId());
         building.setStaticControlsyndId(buildingEntity.getStaticControlSyndId());
+        building.setTargetOfSyndId(buildingEntity.getTargetOfSyndId());
         String buildingUrl = "http://www.gwars.ru/object.php?id=" + buildingEntity.getId();
         building.setUrl(buildingUrl);
 
@@ -28,6 +29,7 @@ public class BuildingMapper {
                 building.getControlSynd(),
                 building.getStaticControlsyndId(),
                 building.getArea(),
+                building.getTargetOfSyndId(),
                 building.getSektorName(),
                 building.getSektorUrl(),
                 building.getDescription()

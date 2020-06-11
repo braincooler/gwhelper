@@ -25,6 +25,9 @@ public class BuildingEntity {
     @Column(name = "area")
     private int area;
 
+    @Column(name = "targetOfSyndId")
+    private int targetOfSyndId;
+
     @Column(name = "sektorName")
     private String sektorName;
 
@@ -33,9 +36,6 @@ public class BuildingEntity {
 
     @Column(name = "description")
     private String description;
-
-    @Column(name = "nextAttackTimestamp")
-    private Long nextAttackTimestamp;
 
     @Column(name = "updateTimestamp")
     private Long updateTimestamp;
@@ -48,6 +48,7 @@ public class BuildingEntity {
                           int controlSyndId,
                           int staticControlSyndId,
                           int area,
+                          int targetOfSyndId,
                           String sektorName,
                           String sektorUrl,
                           String description) {
@@ -56,9 +57,18 @@ public class BuildingEntity {
         this.controlSyndId = controlSyndId;
         this.staticControlSyndId = staticControlSyndId;
         this.area = area;
+        this.targetOfSyndId = targetOfSyndId;
         this.sektorName = sektorName;
         this.sektorUrl = sektorUrl;
         this.description = description;
+    }
+
+    public int getTargetOfSyndId() {
+        return targetOfSyndId;
+    }
+
+    public void setTargetOfSyndId(int targetOfSyndId) {
+        this.targetOfSyndId = targetOfSyndId;
     }
 
     public String getSektorUrl() {
@@ -67,14 +77,6 @@ public class BuildingEntity {
 
     public void setSektorUrl(String sektorUrl) {
         this.sektorUrl = sektorUrl;
-    }
-
-    public Long getNextAttackTimestamp() {
-        return nextAttackTimestamp;
-    }
-
-    public void setNextAttackTimestamp(Long nextAttackTimestamp) {
-        this.nextAttackTimestamp = nextAttackTimestamp;
     }
 
     public Long getUpdateTimestamp() {

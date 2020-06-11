@@ -11,6 +11,15 @@ public class Building {
     private int staticControlsyndId;
     private String description;
     private String sektorName;
+    private int targetOfSyndId;
+
+    public int getTargetOfSyndId() {
+        return targetOfSyndId;
+    }
+
+    public void setTargetOfSyndId(int targetOfSyndId) {
+        this.targetOfSyndId = targetOfSyndId;
+    }
 
     public void setId(int id) {
         this.id = id;

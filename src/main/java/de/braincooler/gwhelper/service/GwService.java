@@ -4,8 +4,6 @@ import de.braincooler.gwhelper.Building;
 import de.braincooler.gwhelper.consumer.SiteBuilder;
 import de.braincooler.gwhelper.repository.BuildingJpaRepository;
 import de.braincooler.gwhelper.repository.BuildingMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,8 +13,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class GwService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GwService.class);
-
     private final BuildingJpaRepository buildingJpaRepository;
     private final SiteBuilder siteBuilder;
 
