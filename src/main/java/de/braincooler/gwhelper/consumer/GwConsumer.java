@@ -3,8 +3,8 @@ package de.braincooler.gwhelper.consumer;
 import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.Building;
 import de.braincooler.gwhelper.repository.BuildingEntity;
-import de.braincooler.gwhelper.repository.BuildingJpaRepository;
 import de.braincooler.gwhelper.repository.BuildingMapper;
+import de.braincooler.gwhelper.repository.BuildingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,11 +27,11 @@ public class GwConsumer {
     private Map<Integer, Map<String, String>> controlledSektors;
 
     private final GwWebClient gwWebClient;
-    private final BuildingJpaRepository buildingJpaRepository;
+    private final BuildingRepository buildingRepository;
 
     public GwConsumer(GwWebClient gwWebClient,
-                      BuildingJpaRepository buildingJpaRepository) {
-        this.buildingJpaRepository = buildingJpaRepository;
+                      BuildingRepository buildingRepository) {
+        this.buildingRepository = buildingRepository;
         controlledSektors = new HashMap<>();
         enemySynd = new HashMap<>();
         this.gwWebClient = gwWebClient;
@@ -146,11 +146,10 @@ public class GwConsumer {
                 String buildingUrl = "http://www.gwars.ru" + objectRef;
                 building.setUrl(buildingUrl);
                 building.setId(Integer.parseInt(buildingUrl.substring(buildingUrl.indexOf("=") + 1)));
-                if (buildingJpaRepository.existsById(building.getId())) {
-                    buildingJpaRepository.deleteById(building.getId());
-                }
+                buildingRepository.deleteById(building.getId());
+
                 for (Integer syndId : supportedSynds) {
-                    building.setTargetOfSyndId(syndId);
+                    building.getTargetOfSyndIds().add(syndId);
                     if (enemySynd.get(syndId).contains(currentControlSyndId) || ownerSyndId == syndId) {
                         HtmlPage buildingLogPage = gwWebClient.fetchBuildingLogPage(building.getId());
                         LocalDateTime readyForAtackTime = readAtackTime(buildingLogPage);
@@ -182,11 +181,10 @@ public class GwConsumer {
                                     building.getOwnerSynd() == 15)) {
                                 BuildingEntity buildingEntity = BuildingMapper.toEntity(building);
                                 buildingEntity.setUpdateTimestamp(Instant.now().getEpochSecond());
-                                buildingJpaRepository.save(buildingEntity);
+                                buildingRepository.save(building);
                             } else {
-                                if (buildingJpaRepository.existsById(building.getId())) {
-                                    buildingJpaRepository.deleteById(building.getId());
-                                }
+                                buildingRepository.deleteById(building.getId());
+
                             }
                         }
                     }

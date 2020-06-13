@@ -1,5 +1,8 @@
 package de.braincooler.gwhelper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Building {
 
     private int id;
@@ -11,14 +14,14 @@ public class Building {
     private int staticControlsyndId;
     private String description;
     private String sektorName;
-    private int targetOfSyndId;
+    private Set<Integer> targetOfSyndIds = new HashSet<>();
 
-    public int getTargetOfSyndId() {
-        return targetOfSyndId;
+    public Set<Integer> getTargetOfSyndIds() {
+        return targetOfSyndIds;
     }
 
-    public void setTargetOfSyndId(int targetOfSyndId) {
-        this.targetOfSyndId = targetOfSyndId;
+    public void setTargetOfSyndIds(Set<Integer> targetOfSyndIds) {
+        this.targetOfSyndIds = targetOfSyndIds;
     }
 
     public void setId(int id) {

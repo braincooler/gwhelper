@@ -95,9 +95,9 @@ public class SiteBuilderImpl implements SiteBuilder {
                 controlSyndOnlineLink,
                 String.format(syndSignLinkTemplate, building.getControlSynd(), building.getControlSynd()));
         String color = "color:#00000";
-        if (gwConsumer.getControlledSektors(building.getTargetOfSyndId()).containsKey(building.getSektorName())) {
-            color = gwConsumer.getControlledSektors(building.getTargetOfSyndId()).get(building.getSektorName());
-        }
+        //    if (gwConsumer.getControlledSektors(building.getTargetOfSyndId()).containsKey(building.getSektorName())) {
+        //        color = gwConsumer.getControlledSektors(building.getTargetOfSyndId()).get(building.getSektorName());
+        //    }
         String style = String.format("style=%s", color);
 
 
