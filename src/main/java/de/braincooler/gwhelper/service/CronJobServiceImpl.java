@@ -1,5 +1,6 @@
 package de.braincooler.gwhelper.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.braincooler.gwhelper.consumer.GwConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +44,12 @@ public class CronJobServiceImpl implements CronJobService {
         LocalDateTime timerStart = LocalDateTime.now();
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
-                gwConsumer.initBuildingsFromSektorPage(i, j, "plants");
-                gwConsumer.initBuildingsFromSektorPage(i, j, "tech");
+                try {
+                    gwConsumer.initBuildingsFromSektorPage(i, j, "plants");
+                    gwConsumer.initBuildingsFromSektorPage(i, j, "tech");
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
             }
         }
         LOGGER.info("<<< --- end [{} - {}}] --- >>>", timerStart, LocalDateTime.now());

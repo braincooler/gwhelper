@@ -21,6 +21,22 @@ public class GwController {
         return ResponseEntity.ok(gwService.getBuildingsWithoutTurel(syndId));
     }
 
+    @GetMapping(path = "/warlist/{syndId}")
+    public ResponseEntity<?> getWarlist(@PathVariable int syndId) {
+        return ResponseEntity.ok(gwService.getWarlist(syndId));
+    }
+
+    @GetMapping(path = "/init/{sektorX}/{sektorY}")
+    public ResponseEntity<?> initSektor(@PathVariable int sektorX, @PathVariable int sektorY) {
+        gwService.initSektor(sektorX, sektorY);
+        return ResponseEntity.ok("ok");
+    }
+
+    @GetMapping(path = "/all")
+    public ResponseEntity<?> initSektor() {
+        return ResponseEntity.ok(gwService.getAll());
+    }
+
     @GetMapping
     public ResponseEntity<?> getHome() {
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
