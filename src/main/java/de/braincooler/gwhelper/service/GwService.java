@@ -31,7 +31,7 @@ public class GwService {
                 .filter(building -> building.getControlSynd() != building.getStaticControlsyndId())
                 .collect(Collectors.toList());
 
-        return siteBuilder.buildSite(buildingsWihtoutTurel);
+        return siteBuilder.buildSite(buildingsWihtoutTurel, syndId);
     }
 
     public Set<Integer> getWarlist(int syndId) {
