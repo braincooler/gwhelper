@@ -31,10 +31,9 @@ public class CronJobServiceImpl implements CronJobService {
     }
 
     @Override
-    // todo
-    // @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
+    @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
     public void initControlledSektors() {
-        // gwConsumer.initControlledSektors(1635);
+        gwConsumer.initControlledSektors(1635);
     }
 
     @Override

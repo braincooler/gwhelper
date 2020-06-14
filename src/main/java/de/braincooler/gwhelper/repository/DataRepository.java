@@ -53,4 +53,8 @@ public class DataRepository {
     public Set<Building> getAllBuildings() {
         return buildingList;
     }
+
+    public Map<String, String> getControlledSektors(int syndId) {
+        return controlledSektors.get(syndId);
+    }
 }

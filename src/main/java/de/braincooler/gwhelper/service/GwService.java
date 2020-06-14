@@ -8,6 +8,7 @@ import de.braincooler.gwhelper.repository.DataRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,5 +49,9 @@ public class GwService {
 
     public Set<Building> getAll() {
         return dataRepository.getAllBuildings();
+    }
+
+    public Map<String, String> getControlledSektors(int syndId) {
+        return dataRepository.getControlledSektors(syndId);
     }
 }

@@ -1,11 +1,13 @@
 package de.braincooler.gwhelper.consumer;
 
 import de.braincooler.gwhelper.Building;
+import de.braincooler.gwhelper.repository.DataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -13,13 +15,15 @@ public class SiteBuilderImpl implements SiteBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(SiteBuilderImpl.class);
 
     private final GwConsumer gwConsumer;
+    private final DataRepository dataRepository;
 
-    public SiteBuilderImpl(GwConsumer gwConsumer) {
+    public SiteBuilderImpl(GwConsumer gwConsumer, DataRepository dataRepository) {
         this.gwConsumer = gwConsumer;
+        this.dataRepository = dataRepository;
     }
 
     @Override
-    public String buildSite(List<Building> buildings) {
+    public String buildSite(List<Building> buildings, int syndId) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "<body>\n" +
@@ -61,7 +65,7 @@ public class SiteBuilderImpl implements SiteBuilder {
                 "            </tr>\n" +
                 "        </thead>\n" +
                 "        <tbody>\n" +
-                buildTableBody(buildings) +
+                buildTableBody(buildings, syndId) +
                 "        </tbody>\n" +
                 "    </table>\n" +
                 "\n" +
@@ -69,14 +73,14 @@ public class SiteBuilderImpl implements SiteBuilder {
                 "</html>";
     }
 
-    private String buildTableBody(List<Building> buildings) {
+    private String buildTableBody(List<Building> buildings, int syndId) {
         AtomicReference<String> tableBody = new AtomicReference<>("");
-        buildings.forEach(building -> tableBody.set(tableBody + getAsHtmlTr(building)));
+        buildings.forEach(building -> tableBody.set(tableBody + getAsHtmlTr(building, syndId)));
 
         return tableBody.get();
     }
 
-    private String getAsHtmlTr(Building building) {
+    private String getAsHtmlTr(Building building, int syndId) {
         String syndSignLinkTemplate = "<img src=\"https://images.gwars.ru/img/synds/%s.gif\"" +
                 " width=\"20\" height=\"14\" border=\"0\" class=\"usersign\" title=\"#%s\">";
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
@@ -95,11 +99,12 @@ public class SiteBuilderImpl implements SiteBuilder {
                 controlSyndOnlineLink,
                 String.format(syndSignLinkTemplate, building.getControlSynd(), building.getControlSynd()));
         String color = "color:#00000";
-        //    if (gwConsumer.getControlledSektors(building.getTargetOfSyndId()).containsKey(building.getSektorName())) {
-        //        color = gwConsumer.getControlledSektors(building.getTargetOfSyndId()).get(building.getSektorName());
-        //    }
-        String style = String.format("style=%s", color);
 
+        Map<String, String> controlledSektors = dataRepository.getControlledSektors(syndId);
+        if (controlledSektors.containsKey(building.getSektorName())) {
+            color = controlledSektors.get(building.getSektorName());
+        }
+        String style = String.format("style=%s", color);
 
         String owner = "";
         try {

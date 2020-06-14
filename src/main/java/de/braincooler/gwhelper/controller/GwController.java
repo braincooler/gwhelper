@@ -37,6 +37,11 @@ public class GwController {
         return ResponseEntity.ok(gwService.getAll());
     }
 
+    @GetMapping(path = "/control/{syndId}")
+    public ResponseEntity<?> initSektor(@PathVariable int syndId) {
+        return ResponseEntity.ok(gwService.getControlledSektors(syndId));
+    }
+
     @GetMapping
     public ResponseEntity<?> getHome() {
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
