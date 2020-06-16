@@ -1,6 +1,5 @@
 package de.braincooler.gwhelper.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.braincooler.gwhelper.Building;
 import de.braincooler.gwhelper.consumer.GwConsumer;
 import de.braincooler.gwhelper.consumer.SiteBuilder;
@@ -39,11 +38,8 @@ public class GwService {
     }
 
     public void initSektor(int sektorX, int sektorY) {
-        try {
-            gwConsumer.initBuildingsFromSektorPage(sektorX, sektorY, "tech");
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        gwConsumer.initBuildingsFromSektorPage(sektorX, sektorY, "tech");
+
         //gwConsumer.initBuildingsFromSektorPage(sektorX, sektorY, "tech");
     }
 
