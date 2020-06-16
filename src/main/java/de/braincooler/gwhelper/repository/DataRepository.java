@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 @Repository
 public class DataRepository {
+    private static final List<Integer> supportedSyndIds = Arrays.asList(1635, 1637);
+
     private final Set<Building> buildingList;
     private final Map<Integer, Set<Integer>> warSynd;
     private final Map<Integer, Map<String, String>> controlledSektors;
@@ -56,5 +58,9 @@ public class DataRepository {
 
     public Map<String, String> getControlledSektors(int syndId) {
         return controlledSektors.get(syndId);
+    }
+
+    public List<Integer> getSupportedSyndIds() {
+        return supportedSyndIds;
     }
 }

@@ -1,7 +1,7 @@
 package de.braincooler.gwhelper.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.braincooler.gwhelper.consumer.GwConsumer;
+import de.braincooler.gwhelper.repository.DataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,25 +15,21 @@ public class CronJobServiceImpl implements CronJobService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CronJobService.class);
 
     private final GwConsumer gwConsumer;
+    private final DataRepository dataRepository;
 
-    public CronJobServiceImpl(GwConsumer gwConsumer) {
+    public CronJobServiceImpl(GwConsumer gwConsumer, DataRepository dataRepository) {
         this.gwConsumer = gwConsumer;
+        this.dataRepository = dataRepository;
     }
 
     @Override
     @PostConstruct
-    public void initSyndWars() {
-        gwConsumer.initSyndWarsList(1635);
-        gwConsumer.initControlledSektors(1635);
-
-        gwConsumer.initSyndWarsList(1637);
-        gwConsumer.initControlledSektors(1637);
-    }
-
-    @Override
     @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
-    public void initControlledSektors() {
-        gwConsumer.initControlledSektors(1635);
+    public void initSyndWarsAndControlledSektors() {
+        dataRepository.getSupportedSyndIds().forEach(syndid -> {
+            gwConsumer.initSyndWarsList(syndid);
+            gwConsumer.initControlledSektors(syndid);
+        });
     }
 
     @Override
@@ -43,12 +39,9 @@ public class CronJobServiceImpl implements CronJobService {
         LocalDateTime timerStart = LocalDateTime.now();
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
-                try {
-                    gwConsumer.initBuildingsFromSektorPage(i, j, "plants");
-                    gwConsumer.initBuildingsFromSektorPage(i, j, "tech");
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
+                gwConsumer.initBuildingsFromSektorPage(i, j, "plants");
+                gwConsumer.initBuildingsFromSektorPage(i, j, "tech");
+
             }
         }
         LOGGER.info("<<< --- end [{} - {}}] --- >>>", timerStart, LocalDateTime.now());

@@ -1,9 +1,8 @@
 package de.braincooler.gwhelper.service;
 
 public interface CronJobService {
-    void initSyndWars();
+    void initSyndWarsAndControlledSektors();
 
-    void initControlledSektors();
 
     void initBuildingsReadyForAttack();
 }

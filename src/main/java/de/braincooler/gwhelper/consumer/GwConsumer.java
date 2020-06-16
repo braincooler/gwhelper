@@ -1,7 +1,5 @@
 package de.braincooler.gwhelper.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.html.*;
 import de.braincooler.gwhelper.Building;
 import de.braincooler.gwhelper.repository.DataRepository;
@@ -13,14 +11,12 @@ import org.w3c.dom.Node;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class GwConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(GwConsumer.class);
-    private static final List<Integer> supportedSyndIds = Arrays.asList(1635, 1637);
 
     private final GwWebClient gwWebClient;
     private final DataRepository dataRepository;
@@ -64,7 +60,7 @@ public class GwConsumer {
         }
     }
 
-    public void initBuildingsFromSektorPage(int sektorX, int sektorY, String type) throws JsonProcessingException {
+    public void initBuildingsFromSektorPage(int sektorX, int sektorY, String type) {
         List<HtmlTableRow> tableRows = gwWebClient.fetchBuildingTable(sektorX, sektorY, type);
         for (int i = 2; i < tableRows.size(); i++) {
             HtmlTableRow row = tableRows.get(i);
@@ -139,26 +135,20 @@ public class GwConsumer {
                 building.setId(Integer.parseInt(buildingUrl.substring(buildingUrl.indexOf("=") + 1)));
                 building.setSektorUrl(String.format("http://www.gwars.ru/map.php?sx=%d&sy=%d&st=%s", sektorX, sektorY, type));
                 dataRepository.deleteById(building.getId());
-                try {
 
+                for (Integer supportedSyndId : dataRepository.getSupportedSyndIds()) {
+                    if (dataRepository.hasWar(supportedSyndId, building.getControlSynd()) || building.getStaticControlsyndId() == supportedSyndId) {
+                        building.getTargetOfSyndIds().add(supportedSyndId);
+                        extendBuildingInfo(building);
 
-                    for (Integer supportedSyndId : supportedSyndIds) {
-                        if (dataRepository.hasWar(supportedSyndId, building.getControlSynd()) || building.getStaticControlsyndId() == supportedSyndId) {
-                            building.getTargetOfSyndIds().add(supportedSyndId);
-                            extendBuildingInfo(building);
+                        if (building.getControlSynd() != supportedSyndId &&
+                                (building.getDescription() != null && !building.getDescription().contains("Сектор [G]"))) {
+                            dataRepository.save(building);
+                        } else {
+                            dataRepository.deleteById(building.getId());
 
-                            if (building.getControlSynd() != supportedSyndId &&
-                                    (building.getDescription() != null && !building.getDescription().contains("Сектор [G]"))) {
-                                dataRepository.save(building);
-                            } else {
-                                dataRepository.deleteById(building.getId());
-
-                            }
                         }
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(building));
                 }
             }
         }
