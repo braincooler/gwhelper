@@ -54,7 +54,6 @@ public class Building {
 
     public int getId() {
         return id;
-        //return Integer.parseInt(url.substring(url.indexOf("=") + 1));
     }
 
     public String getSektorUrl() {
