@@ -85,9 +85,6 @@ public class SiteBuilderImpl implements SiteBuilder {
                 " width=\"20\" height=\"14\" border=\"0\" class=\"usersign\" title=\"#%s\">";
         String linkTemplate = "<a href=\"%s\" target=\"_blank\">%s</a>";
 
-        if (building.getDescription() == null) {
-            building.setDescription("no content");
-        }
         String buildingLink = String.format(
                 linkTemplate,
                 building.getUrl(),

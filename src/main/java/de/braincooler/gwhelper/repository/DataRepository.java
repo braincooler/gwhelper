@@ -57,6 +57,7 @@ public class DataRepository {
     }
 
     public Map<String, String> getControlledSektors(int syndId) {
+        controlledSektors.computeIfAbsent(syndId, k -> new HashMap<>());
         return controlledSektors.get(syndId);
     }
 
