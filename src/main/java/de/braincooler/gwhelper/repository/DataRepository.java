@@ -13,11 +13,16 @@ public class DataRepository {
     private final Set<Building> buildingList;
     private final Map<Integer, Set<Integer>> warSynd;
     private final Map<Integer, Map<String, String>> controlledSektors;
+    private final Map<Integer, List<Building>> controlledBuildings;
 
     public DataRepository() {
         this.buildingList = new HashSet<>();
         this.controlledSektors = new HashMap<>();
         this.warSynd = new HashMap<>();
+        this.controlledBuildings = new HashMap<>();
+        for (Integer supportedSyndId : supportedSyndIds) {
+            controlledBuildings.put(supportedSyndId, new ArrayList<>());
+        }
     }
 
     public void save(Building building) {
@@ -63,5 +68,19 @@ public class DataRepository {
 
     public List<Integer> getSupportedSyndIds() {
         return supportedSyndIds;
+    }
+
+    public void saveControlledBuilding(Building building) {
+        controlledBuildings.get(building.getControlSynd()).add(building);
+    }
+
+    public void deleteControledBuilding(Building building) {
+        for (Integer supportedSyndId : supportedSyndIds) {
+            controlledBuildings.get(supportedSyndId).remove(building);
+        }
+    }
+
+    public List<Building> getControlledBuildings(int syndId) {
+        return controlledBuildings.get(syndId);
     }
 }

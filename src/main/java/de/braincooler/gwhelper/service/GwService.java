@@ -50,4 +50,8 @@ public class GwService {
     public Map<String, String> getControlledSektors(int syndId) {
         return dataRepository.getControlledSektors(syndId);
     }
+
+    public List<Building> getControlledBuildings(int syndId) {
+        return dataRepository.getControlledBuildings(syndId);
+    }
 }

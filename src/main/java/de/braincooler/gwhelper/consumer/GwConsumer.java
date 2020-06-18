@@ -146,8 +146,12 @@ public class GwConsumer {
                             dataRepository.save(building);
                         } else {
                             dataRepository.deleteById(building.getId());
-
                         }
+                    }
+                    if (building.getControlSynd() == supportedSyndId) {
+                        dataRepository.saveControlledBuilding(building);
+                    } else {
+                        dataRepository.deleteControledBuilding(building);
                     }
                 }
             }
