@@ -1,6 +1,6 @@
 package de.braincooler.gwhelper.controller;
 
-import de.braincooler.gwhelper.service.GwService;
+import de.braincooler.gwhelper.service.AdvertisementService;
 import de.braincooler.gwhelper.service.SiteBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 public class GwController {
-    private final GwService gwService;
+    private final AdvertisementService advertisementService;
 
     private final SiteBuilder siteBuilder;
 
-    public GwController(GwService gwService, SiteBuilder siteBuilder) {
-        this.gwService = gwService;
+    public GwController(AdvertisementService advertisementService, SiteBuilder siteBuilder) {
+        this.advertisementService = advertisementService;
         this.siteBuilder = siteBuilder;
     }
 
