@@ -31,7 +31,8 @@ public class GwService {
 
     public void initSektorOnSale(int x, int y) {
         SektorHtmlTablePair sektorHtmlTablePair = gwWebClient.fetchOnSalePageFromSektor(x, y);
-        LOGGER.info("<--- " + sektorHtmlTablePair.getSektor().getName() + " --->");
+        LOGGER.info("<--- {} [{}:{}] --->", sektorHtmlTablePair.getSektor().getName(),
+                sektorHtmlTablePair.getSektor().getX(), sektorHtmlTablePair.getSektor().getY());
         advertisementRepository.removeOld(sektorHtmlTablePair.getSektor());
         for (int i = 1; i < sektorHtmlTablePair.getHtmlTableRows().size(); i++) {
             HtmlTableRow row = sektorHtmlTablePair.getHtmlTableRows().get(i);

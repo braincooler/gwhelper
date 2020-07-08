@@ -34,6 +34,7 @@ public class ScheduledService {
 
         // Z
         gwService.initSektorOnSale(152, 148);
+        gwService.initSektorOnSale(149, 150);
         for (int i = 149; i <= 152; i++) {
             for (int j = 149; j <= 152; j++) {
                 if ((i != 152 && j != 150) && (i != 150 && j != 152)) {
