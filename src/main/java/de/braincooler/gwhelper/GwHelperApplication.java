@@ -11,6 +11,5 @@ public class GwHelperApplication {
     public static void main(String[] args) {
         SpringApplication.run(GwHelperApplication.class, args);
         System.out.println("copy");
-        System.out.println("test");
     }
 }
