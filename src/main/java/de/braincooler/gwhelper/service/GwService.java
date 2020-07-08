@@ -86,9 +86,9 @@ public class GwService {
             Building building = new Building(buildingId, buildingType, buildingArea, ownerId, ownerName);
             Advertisement advertisement = new Advertisement(sektorHtmlTablePair.getSektor(), building, buildingAmount);
 
-            LOGGER.info(i + ". id=" + buildingId + " type=" + buildingType +
-                    " area=" + buildingArea + " price=" + buildingAmount.getPrice() + " " + buildingAmount.getCurrency() + " ownerRef: " + ownerRef + ".");
-
+            //LOGGER.info(i + ". id=" + buildingId + " type=" + buildingType +
+            //       " area=" + buildingArea + " price=" + buildingAmount.getPrice() + " " + buildingAmount.getCurrency() + " ownerRef: " + ownerRef + ".");
+            //
             advertisementRepository.addAdvertisement(advertisement);
         }
     }
