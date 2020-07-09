@@ -48,7 +48,10 @@ public class SiteBuilder {
                 "    var table = $('#example').DataTable( {\n" +
                 "        iDisplayLength: 50," +
                 "        orderCellsTop: true," +
-                "        fixedHeader: true" +
+                "        fixedHeader: true," +
+                "\"bPaginate\": true,\n" +
+                "    \"bLengthChange\": false\n" +
+
                 "    });\n" +
                 "});" +
                 "</script>\n" +
