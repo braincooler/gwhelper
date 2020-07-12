@@ -23,4 +23,9 @@ public class GwController {
     public ResponseEntity<?> getAdvertisementList() {
         return ResponseEntity.ok(siteBuilder.buildSite());
     }
+
+    @GetMapping(path = "test")
+    public ResponseEntity<?> getMapSize() {
+        return ResponseEntity.ok(advertisementService.getMapSize());
+    }
 }

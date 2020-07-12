@@ -15,8 +15,6 @@ import de.braincooler.gwhelper.repository.AdvertisementRepository;
 import de.braincooler.gwhelper.repository.BuildingRepository;
 import de.braincooler.gwhelper.repository.PriceHistoryRepository;
 import org.hibernate.Hibernate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +26,6 @@ import java.util.Optional;
 
 @Service
 public class AdvertisementService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementService.class);
-
     private final GwWebClient gwWebClient;
     private final AdvertisementRepository advertisementRepository;
     private final BuildingRepository buildingRepository;
@@ -172,5 +168,11 @@ public class AdvertisementService {
                             .replace(",", ""));
             return new Amount(price, "Eun");
         }
+    }
+
+    public int getMapSize() {
+        return advertisementRepository.getAll()
+                .keySet()
+                .size();
     }
 }
