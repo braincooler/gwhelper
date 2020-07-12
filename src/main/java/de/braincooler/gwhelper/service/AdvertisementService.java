@@ -45,8 +45,6 @@ public class AdvertisementService {
     @Transactional
     public void initSektorOnSale(int x, int y) {
         SektorHtmlTablePair sektorHtmlTablePair = gwWebClient.fetchOnSalePageFromSektor(x, y);
-        LOGGER.info("<--- {} [{}:{}] --->", sektorHtmlTablePair.getSektor().getName(),
-                sektorHtmlTablePair.getSektor().getX(), sektorHtmlTablePair.getSektor().getY());
         List<BuildingEntity> persistedBuilding = buildingRepository.
                 findAllBySektorName(sektorHtmlTablePair.getSektor().getName());
         advertisementRepository.removeOld(sektorHtmlTablePair.getSektor());
