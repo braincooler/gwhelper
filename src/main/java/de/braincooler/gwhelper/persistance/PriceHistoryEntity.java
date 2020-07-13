@@ -21,17 +21,17 @@ public class PriceHistoryEntity {
     private Long timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private BuildingEntity buildingEntity;
+    private AdvertisementEntity advertisementEntity;
 
     public PriceHistoryEntity() {
     }
 
-    public PriceHistoryEntity(Integer id, Integer price, String currency, Long timestamp, BuildingEntity buildingEntity) {
+    public PriceHistoryEntity(Integer id, Integer price, String currency, Long timestamp, AdvertisementEntity advertisementEntity) {
         this.id = id;
         this.price = price;
         this.currency = currency;
         this.timestamp = timestamp;
-        this.buildingEntity = buildingEntity;
+        this.advertisementEntity = advertisementEntity;
     }
 
     public Integer getPrice() {
@@ -58,12 +58,12 @@ public class PriceHistoryEntity {
         this.id = id;
     }
 
-    public BuildingEntity getBuildingEntity() {
-        return buildingEntity;
+    public AdvertisementEntity getAdvertisementEntity() {
+        return advertisementEntity;
     }
 
-    public void setBuildingEntity(BuildingEntity buildingEntity) {
-        this.buildingEntity = buildingEntity;
+    public void setAdvertisementEntity(AdvertisementEntity advertisementEntity) {
+        this.advertisementEntity = advertisementEntity;
     }
 
     public Long getTimestamp() {

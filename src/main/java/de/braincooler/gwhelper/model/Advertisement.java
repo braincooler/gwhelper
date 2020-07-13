@@ -5,7 +5,9 @@ public class Advertisement {
     private Building building;
     private Amount amount;
 
-    public Advertisement(Sektor sektor, Building building, Amount amount) {
+    public Advertisement(Sektor sektor,
+                         Building building,
+                         Amount amount) {
         this.sektor = sektor;
         this.building = building;
         this.amount = amount;

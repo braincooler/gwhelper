@@ -1,21 +1,21 @@
 package de.braincooler.gwhelper.service;
 
 import de.braincooler.gwhelper.model.Advertisement;
-import de.braincooler.gwhelper.repository.AdvertisementRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.braincooler.gwhelper.repository.LocalRepository;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.util.stream.Collectors;
 
 @Service
 public class SiteBuilder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SiteBuilder.class);
+    private final LocalRepository localRepository;
+    private final AdvertisementService advertisementService;
 
-    private final AdvertisementRepository advertisementRepository;
-
-    public SiteBuilder(AdvertisementRepository advertisementRepository) {
-        this.advertisementRepository = advertisementRepository;
+    public SiteBuilder(LocalRepository localRepository,
+                       AdvertisementService advertisementService) {
+        this.localRepository = localRepository;
+        this.advertisementService = advertisementService;
     }
 
     public String buildSite() {
@@ -92,12 +92,9 @@ public class SiteBuilder {
     }
 
     private String buildTableBody() {
-        StringBuilder body = new StringBuilder();
-        for (Advertisement advertisement : advertisementRepository.getAll().values()) {
-            body.append(getAsHtmlTr(advertisement));
-        }
-
-        return body.toString();
+        return advertisementService.getAllOnSale().stream()
+                .map(this::getAsHtmlTr)
+                .collect(Collectors.joining());
     }
 
     private String getAsHtmlTr(Advertisement advertisement) {
