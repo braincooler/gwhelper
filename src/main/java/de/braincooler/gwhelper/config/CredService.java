@@ -27,6 +27,6 @@ public class CredService {
 
     @PostConstruct
     private void init() {
-        LOGGER.info("user '{}'", gwUser);
+        LOGGER.info("<< -------- gw-user:{} -------- >>", gwUser);
     }
 }
