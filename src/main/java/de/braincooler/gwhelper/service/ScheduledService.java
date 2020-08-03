@@ -12,10 +12,8 @@ public class ScheduledService {
         this.advertisementService = advertisementService;
     }
 
-    @Scheduled(fixedDelay = 1 * 60 * 1000)
+    @Scheduled(fixedDelay = 60 * 60 * 1000)
     private void initAdvertisementRepo() {
-        advertisementService.initSektorOnSale(149, 150);
-        /*
         // G
         for (int i = 47; i <= 53; i++) {
             for (int j = 47; j <= 53; j++) {
@@ -44,6 +42,5 @@ public class ScheduledService {
             }
         }
 
- */
     }
 }
